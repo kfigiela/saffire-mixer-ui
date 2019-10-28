@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        ".psc-ide-port": true,
+        ".pulp-pcache": true,
+        "output": true
+    }
+}

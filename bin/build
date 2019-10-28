@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "Building PureScript..."
+echo "psc-package install"
+psc-package install
+echo "purs compile"
+#psc-package sources | xargs purs compile 'src/**/*.purs'
+npm run pbuild
+bin/purs-browserify Main output/bundle.js
+echo "done."

@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "name": "saffire-mixer-ui",
+  "displayName": "Focusrite Saffire LE mixer UI",
+  "version": "1.0.0",
+  "description": "UI",
+  "scripts": {
+    "postinstall": "bin/install-purescript && [ -n \"$DONT_RUN_BOWER_INSTALL\" ] || psc-package install",
+    "clean": "rm -rf output",
+    "build": "bin/build",
+    "prepl": "pulp --psc-package repl",
+    "pbuild": "pulp --psc-package build",
+    "ptest": "pulp --psc-package test",
+    "pscide": "psc-package sources | xargs purs ide server --log-level=debug 'src/**/*.purs' 'test/**/*.purs'"
+  },
+  "author": "Restaumatic.com",
+  "dependencies": {
+    "autoprefixer": "^9.4.0",
+    "browserify": "^16.2.3",
+    "browserify-incremental": "^3.1.1",
+    "es6-shim": "^0.35.4",
+    "firebase": "^5.5.1",
+    "material-components-web": "^0.44.0",
+    "node-sass": "^4.12.0",
+    "postcss-cli": "^6.0.1"
+  },
+  "devDependencies": {
+    "async-sema": "3.0.0",
+    "eslint": "^6.3.0",
+    "livereload": "^0.7.0",
+    "mocha": "^6.2.0",
+    "nodemon": "^1.18.0",
+    "pulp": "^12.3.0",
+    "purescript-psa": "^0.7.3"
+  }
+}

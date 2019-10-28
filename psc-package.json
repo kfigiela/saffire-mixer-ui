@@ -1,0 +1,19 @@
+{
+    "name": "ros",
+    "set": "LATEST",
+    "source": "./package-set",
+    "depends": [
+      "aff-promise",
+      "arraybuffer-types",
+      "avar",
+      "console",
+      "effect",
+      "formatters",
+      "js-timers",
+      "prelude",
+      "group",
+      "web-dom",
+      "web-html",
+      "specular"
+    ]
+  }

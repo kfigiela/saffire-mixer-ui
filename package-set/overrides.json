@@ -1,0 +1,272 @@
+{
+  "affjax": {
+    "dependencies": [
+      "aff",
+      "argonaut-core",
+      "arraybuffer-types",
+      "foreign",
+      "form-urlencoded",
+      "http-methods",
+      "integers",
+      "math",
+      "media-types",
+      "nullable",
+      "refs",
+      "unsafe-coerce",
+      "web-xhr"
+    ],
+    "repo": "https://github.com/slamdata/purescript-affjax.git",
+    "version": "v6.0.0"
+  },
+  "foreign-extra": {
+    "dependencies": [
+      "foreign",
+      "foreign-generic"
+    ],
+    "repo": "../../foreign-extra",
+    "version": "LATEST"
+  },
+  "foreign-generic": {
+    "dependencies": [
+      "either",
+      "exceptions",
+      "foreign",
+      "foreign-object",
+      "functions",
+      "generics-rep",
+      "identity",
+      "integers",
+      "lists",
+      "maybe",
+      "prelude",
+      "proxy",
+      "record",
+      "strings",
+      "transformers"
+    ],
+    "repo": "https://github.com/restaumatic/purescript-foreign-generic.git",
+    "version": "v7.0.0-restaumatic2"
+  },
+  "int-53": {
+    "dependencies": [
+      "integers",
+      "math",
+      "prelude",
+      "strings"
+    ],
+    "repo": "https://github.com/rgrempel/purescript-int-53.git",
+    "version": "v4.0.0"
+  },
+  "jack": {
+    "dependencies": [
+      "arrays",
+      "console",
+      "foldable-traversable",
+      "foreign-object",
+      "int-53",
+      "lists",
+      "ordered-collections",
+      "prelude",
+      "random"
+    ],
+    "repo": "https://github.com/restaumatic/purescript-jack.git",
+    "version": "v2.0.0-restaumatic1"
+  },
+  "jquery": {
+    "dependencies": [
+      "effect",
+      "foreign",
+      "web-dom"
+    ],
+    "repo": "https://github.com/paf31/purescript-jquery.git",
+    "version": "v5.0.0"
+  },
+  "parsing": {
+    "dependencies": [
+      "arrays",
+      "either",
+      "foldable-traversable",
+      "identity",
+      "integers",
+      "lists",
+      "maybe",
+      "prelude",
+      "psci-support",
+      "strings",
+      "transformers",
+      "unicode"
+    ],
+    "repo": "https://github.com/purescript-contrib/purescript-parsing.git",
+    "version": "v5.0.3"
+  },
+  "pux": {
+    "dependencies": [
+      "aff",
+      "css",
+      "effect",
+      "foreign-object",
+      "functions",
+      "globals",
+      "lists",
+      "ordered-collections",
+      "profunctor",
+      "react",
+      "signal",
+      "smolder",
+      "web-html",
+      "web-uievents"
+    ],
+    "repo": "https://github.com/alexmingoia/purescript-pux.git",
+    "version": "v13.0.0"
+  },
+  "react": {
+    "dependencies": [
+      "effect",
+      "exceptions",
+      "nullable",
+      "prelude",
+      "record",
+      "unsafe-coerce"
+    ],
+    "repo": "https://github.com/purescript-contrib/purescript-react.git",
+    "version": "v6.1.0"
+  },
+  "record": {
+    "dependencies": [
+      "functions",
+      "prelude",
+      "st",
+      "typelevel-prelude",
+      "unsafe-coerce"
+    ],
+    "repo": "https://github.com/purescript/purescript-record.git",
+    "version": "v2.0.1"
+  },
+  "restaumatic-common": {
+    "dependencies": [
+      "affjax",
+      "datetime",
+      "effect",
+      "foreign",
+      "foreign-extra",
+      "foreign-generic",
+      "jack",
+      "jquery",
+      "js-date",
+      "now",
+      "numbers",
+      "parsing",
+      "record-extra",
+      "restaumatic-prelude",
+      "specular",
+      "validation",
+      "variant"
+    ],
+    "repo": "../../restaumatic-common",
+    "version": "LATEST"
+  },
+  "restaumatic-core-types": {
+    "dependencies": [
+      "datetime",
+      "either",
+      "foreign",
+      "foreign-generic",
+      "prelude",
+      "restaumatic-common",
+      "restaumatic-core-types-sites",
+      "restaumatic-prelude"
+    ],
+    "repo": "../../restaumatic-core-types",
+    "version": "LATEST"
+  },
+  "restaumatic-core-types-sites": {
+    "dependencies": [
+      "datetime",
+      "either",
+      "foreign",
+      "foreign-generic",
+      "prelude",
+      "restaumatic-common",
+      "restaumatic-prelude",
+      "restaumatic-promotions-engine"
+    ],
+    "repo": "../../restaumatic-core-types-sites",
+    "version": "LATEST"
+  },
+  "restaumatic-prelude": {
+    "dependencies": [
+      "either",
+      "foldable-traversable",
+      "newtype",
+      "prelude",
+      "tuples"
+    ],
+    "repo": "../../restaumatic-prelude",
+    "version": "LATEST"
+  },
+  "restaumatic-promotions-engine": {
+    "dependencies": [
+      "arrays",
+      "foreign-extra",
+      "foreign-generic",
+      "generics-rep",
+      "ordered-collections",
+      "prelude",
+      "restaumatic-common",
+      "restaumatic-prelude"
+    ],
+    "repo": "../../promotions-engine",
+    "version": "LATEST"
+  },
+  "smolder": {
+    "dependencies": [
+      "bifunctors",
+      "catenable-lists",
+      "free",
+      "globals",
+      "ordered-collections",
+      "prelude",
+      "strings",
+      "test-unit",
+      "transformers",
+      "tuples"
+    ],
+    "repo": "https://github.com/restaumatic/purescript-smolder.git",
+    "version": "v11.0.1-restaumatic1"
+  },
+  "specular": {
+    "dependencies": [
+      "aff",
+      "debug",
+      "effect",
+      "foreign-object",
+      "generics-rep",
+      "maybe",
+      "prelude",
+      "random",
+      "record",
+      "transformers",
+      "unsafe-coerce",
+      "contravariant",
+      "unsafe-reference"
+    ],
+    "repo": "https://github.com/restaumatic/purescript-specular.git",
+    "version": "v0.6.2"
+  },
+  "uri": {
+    "dependencies": [
+      "arrays",
+      "generics-rep",
+      "globals",
+      "integers",
+      "parsing",
+      "prelude",
+      "profunctor-lenses",
+      "these",
+      "unfoldable"
+    ],
+    "repo": "https://github.com/slamdata/purescript-uri.git",
+    "version": "v6.0.0"
+  },
+  "simple-json": null
+}

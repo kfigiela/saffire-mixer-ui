@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+cd $(dirname $0)/..
+
+MAIN_MODULE=$1
+OUTPUT_FILE=$2
+
+export PATH=`pwd`/node_modules/.bin:$PATH
+
+if [ "${ROS_USE_PURS_FAST_BUNDLE:-}" = "true" ]; then
+    PURS_BUNDLE="purs-fast-bundle"
+else
+    PURS_BUNDLE="purs bundle"
+fi
+
+intermediate_bundle=output/purs_bundle_${MAIN_MODULE}.js
+
+echo "purs bundle (using ${PURS_BUNDLE}) -> $intermediate_bundle"
+$PURS_BUNDLE -m $MAIN_MODULE --main $MAIN_MODULE output/*/{index,foreign}.js > $intermediate_bundle
+echo "browserify -> $OUTPUT_FILE"
+browserifyinc --cachefile .pulp-cache/browserify-cache-${MAIN_MODULE}.json $intermediate_bundle -o ${OUTPUT_FILE}.tmp
+mv ${OUTPUT_FILE}.tmp $OUTPUT_FILE
