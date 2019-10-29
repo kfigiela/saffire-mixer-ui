@@ -65,12 +65,12 @@ instance encodeInputChannel :: Encode InputChannel where
 data MixerCmd =
     Noop
     | Mute { output :: OutputPair, muted :: Boolean }
-    | Attenuate { output :: OutputPair, db :: Number }
+    | Attenuate { output :: OutputPair, db :: Int }
     | InGain { input :: InputChannel, gainOn :: Boolean }
     | MidiThru { midiThru :: Boolean }
     | SPDIFTransparent { spdifTransparent :: Boolean }
     | SetMatrixMixer { matrixMix :: MM.MatrixMixer }
-    | SetStereoMixer { steroMix :: SM.StereoMixer }
+    | SetStereoMixer { stereoMix :: SM.StereoMixer }
     | SetHighResMixer { highResMix :: HM.Mixer }
 
 

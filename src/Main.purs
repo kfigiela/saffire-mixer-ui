@@ -2,195 +2,148 @@ module Main where
 
 import SPrelude
 
-import Control.Monad.Cleanup (onCleanup)
-import Control.Monad.Except (runExcept, runExceptT)
+import Control.Monad.Except (runExcept)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(Left, Right), either)
-import Data.Functor (map)
-import Data.Functor.Contravariant ((>$<))
 import Data.List (List, singleton)
 import Data.List.NonEmpty (toList)
-import Data.Maybe (maybe)
-import Effect (Effect)
-import Effect (Effect)
-import Effect.Class (liftEffect)
-import Effect.Timer (setTimeout)
-import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, mkEffectFn2, runEffectFn1, runEffectFn2)
 import Foreign (readString, renderForeignError)
 import Foreign.Generic (decodeJSON, encodeJSON)
 import Logger as Logger
-import Prelude (Unit, bind, discard, pure, ($), (<<<), (<>), (==), (>>=))
-import SaffireLE.Server (MixerCmd(..), OutputPair(..), SaffireStatus(..), defaultState)
-import SaffireLE.Status (DeviceStatus(..), VUMeters(..), defaultDeviceStatus)
-import Specular.Callback (Callback, attachEvent, mkCallback, triggerCallback)
-import Specular.Dom.Browser (Node, (:=))
-import Specular.Dom.Builder.Class (domEventWithSample, dynText, rawHtml)
-import Specular.Dom.Element (Prop(..), text)
-import Specular.Dom.Element as E
+import MDC.Widgets (slider, switch)
+import SaffireLE.Mixer.Stereo (StereoMixer(..))
+import SaffireLE.Server (InputChannel(..), MixerCmd(..), OutputPair(..), SaffireStatus(..), State(..), defaultState)
+import SaffireLE.Status (DeviceStatus(..), defaultDeviceStatus)
+import SaffireLE.UI.VUMeter (vuMeter)
+import Specular.Callback (mkCallback)
 import Specular.Dom.Widget (Widget, runMainWidgetInBody)
-import Specular.Dom.Widgets.Input (checkboxView)
-import Specular.FRP (Dynamic, _subscribeEvent, changed, newDynamic, newEvent, readDynamic, subscribeDyn, subscribeDyn_, subscribeEvent_, weaken)
-import Specular.Internal.Effect (pushDelayed)
-import Specular.Ref (Ref, newRef, refUpdateConst, refValue)
+import Specular.FRP (newDynamic)
 import Web.Event.Event (Event)
 import Web.Event.EventTarget (addEventListener, eventListener)
-import Web.HTML (window) as DOM
-import Web.HTML.Location (protocol, host) as DOM
-import Web.HTML.Window (location) as DOM
-import Web.Socket.BinaryType (BinaryType(ArrayBuffer))
-import Web.Socket.Event.EventTypes (onOpen, onMessage) as WS
+import Web.Socket.Event.EventTypes as WS
 import Web.Socket.Event.MessageEvent (MessageEvent, fromEvent, data_)
 import Web.Socket.WebSocket (WebSocket)
-import Web.Socket.WebSocket (create, sendString, sendArrayBufferView, setBinaryType, toEventTarget) as WS
-import Data.Number.Format (toStringWith, fixed)
+import Web.Socket.WebSocket as WS
 
 
 main :: Effect Unit
-main = runMainWidgetInBody mainWidget
+main = runMainWidgetInBody do
+    backend <- connectToBackend "ws://localhost:3000"
+    mainWidget backend
 
-mainWidget :: Widget Unit
-mainWidget = do
-    ws <- liftEffect $ WS.create "ws://localhost:3000" []
+type Backend = {meters :: Dynamic DeviceStatus, state :: Dynamic State, sendCommand :: Callback MixerCmd}
 
-    messageE <- newEvent
-    liftEffect $ onMsg ws messageE.fire (Logger.error ∘ show)
+connectToBackend :: String -> Widget Backend
+connectToBackend url = do
+    ws <- liftEffect $ WS.create url []
+
     {dynamic: meters, set: setMeters} <- newDynamic defaultDeviceStatus
     {dynamic: state, set: setState} <- newDynamic defaultState
-    flip subscribeEvent_ messageE.event $ \evt -> do
-        let msg :: Maybe SaffireStatus
-            msg = hush $ runExcept $ decodeJSON evt
-        whenJust msg $ case _ of
-            Meters metersData -> setMeters metersData
-            CurrentState stateData -> setState stateData
-    let sendMixerCmd :: Callback MixerCmd
-        sendMixerCmd = mkCallback $ \mixerCmd -> do
+
+    let handleMessage evt = do
+            let msg :: Maybe SaffireStatus
+                msg = hush $ runExcept $ decodeJSON evt
+            whenJust msg $ case _ of
+                Meters metersData -> setMeters metersData
+                CurrentState stateData -> setState stateData
+    liftEffect $ onMsg ws handleMessage (Logger.error ∘ show)
+
+    let sendCommand :: Callback MixerCmd
+        sendCommand = mkCallback $ \mixerCmd -> do
             WS.sendString ws $ encodeJSON mixerCmd
-        attenuate :: OutputPair -> Callback Number
-        attenuate pair = (\db -> Attenuate { output: pair, db }) >$< sendMixerCmd
-        muteOutput :: OutputPair -> Callback Boolean
-        muteOutput pair = (\muted -> Mute { output: pair, muted }) >$< sendMixerCmd
+    pure {meters, state, sendCommand}
 
 
-    E.el "div" [E.class_ "mdc-layout-grid"] do
-        E.el "div" [E.class_ "mdc-layout-grid__inner"] do
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
-                E.el "h3" [E.class_ "mdc-typography--subtitle1"] $ text "Inputs"
+mainWidget :: Backend -> Widget Unit
+mainWidget {meters, state, sendCommand} = do
+    el "h3" [class_ "mdc-typography--subtitle1"] $ text "Inputs"
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "In 1" $ _.in1 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "In 2" $ _.in2 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "In 3" $ _.in3 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
+                el "label" [class_ "mdc-typography--caption"] do
+                    switch (pure false) (_.in3Gain ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (inGain Ch3)
+                    text "High gain"
                 vuMeter "In 4" $ _.in4 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
+                el "label" [class_ "mdc-typography--caption"] do
+                    switch (pure false) (_.in4Gain ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (inGain Ch4)
+                    text "High gain"
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "SPDIF In 5" $ _.spdifIn1 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "SPDIF In 6" $ _.spdifIn2 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
-                E.el "h3" [E.class_ "mdc-typography--subtitle1"] $ text "DAC"
+    el "h3" [class_ "mdc-typography--subtitle1"] $ text "DAC"
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "DAC 1" $ _.dac1 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "DAC 2" $ _.dac2 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "DAC 3" $ _.dac3 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "DAC 4" $ _.dac4 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
 
-    E.el "h3" [E.class_ "mdc-typography--subtitle1"] $ text "Outputs"
-    E.el "div" [E.class_ "mdc-layout-grid"] do
-        E.el "div" [E.class_ "mdc-layout-grid__inner"] do
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
+    el "h3" [class_ "mdc-typography--subtitle1"] $ text "Outputs"
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "Out 1" $ _.out1 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "Out 2" $ _.out2 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
-                checkbox (_.mute ∘ unwrap ∘ _.out12Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out12)
-                slider (_.attenuation ∘ unwrap ∘ _.out12Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out12)
-    E.el "div" [E.class_ "mdc-layout-grid"] do
-        E.el "div" [E.class_ "mdc-layout-grid__inner"] do
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
+                el "label" mempty do
+                    switch (pure false) (not ∘ _.mute ∘ unwrap ∘ _.out12Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out12)
+                slider attenuationSlider ((127 - _) ∘ _.attenuation ∘ unwrap ∘ _.out12Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out12)
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "Out 3" $ _.out3 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "Out 4" $ _.out4 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
-                checkbox (_.mute ∘ unwrap ∘ _.out34Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out34)
-                slider (_.attenuation ∘ unwrap ∘ _.out34Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out34)
-    E.el "div" [E.class_ "mdc-layout-grid"] do
-        E.el "div" [E.class_ "mdc-layout-grid__inner"] do
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
+                el "label" mempty do
+                    switch (pure false) (not ∘ _.mute ∘ unwrap ∘ _.out34Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out34)
+                slider attenuationSlider ((127 - _) ∘_.attenuation ∘ unwrap ∘ _.out34Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out34)
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "Out 5" $ _.out5 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "Out 6" $ _.out6 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
-                checkbox (_.mute ∘ unwrap ∘ _.out56Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out56)
-                slider (_.attenuation ∘ unwrap ∘ _.out56Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out56)
-    E.el "div" [E.class_ "mdc-layout-grid"] do
-        E.el "div" [E.class_ "mdc-layout-grid__inner"] do
-            E.el "div" [E.class_ "mdc-layout-grid__cell"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
+                el "label" mempty do
+                    switch (pure false) (not ∘ _.mute ∘ unwrap ∘ _.out56Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (muteOutput Out56)
+                slider attenuationSlider ((127 - _) ∘_.attenuation ∘ unwrap ∘ _.out56Opts ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) (attenuate Out56)
+    el "div" [class_ "mdc-layout-grid"] do
+        el "div" [class_ "mdc-layout-grid__inner"] do
+            el "div" [class_ "mdc-layout-grid__cell"] do
                 vuMeter "Spdif Out 7" $ _.spdifOut7 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
                 vuMeter "Spdif Out 8" $ _.spdifOut8 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
-
-vuMeter :: String -> Dynamic (Maybe Number) -> Widget Unit
-vuMeter chName value = do
-    E.el "div" [E.class_ "vu"] do
-        E.el "h3" [E.classes ["vu__label", "mdc-typography--caption"]] $ text chName
-        E.el "div" [E.class_ "mdc-linear-progress", E.attrs ("role":="progressbar")] do
-            E.el_ "div" [E.class_ "mdc-linear-progress__buffer"]
-            E.el "div" [E.classes ["mdc-linear-progress__bar", "mdc-linear-progress__secondary-bar", "vu__peak"], transform scaleFraction] do
-                E.el_ "span" [E.class_ "mdc-linear-progress__bar-inner"]
-            E.el "div" [E.classes ["mdc-linear-progress__bar", "mdc-linear-progress__primary-bar", "vu__average"], transform scaleFraction] do
-                E.el_ "span" [E.class_ "mdc-linear-progress__bar-inner"]
-
+            el "div" [class_ "mdc-layout-grid__cell"] do
+                el "label" [class_ "mdc-typography--caption"] do
+                    switch (pure false) (_.spdifTransparent ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) ((\spdifTransparent -> SPDIFTransparent { spdifTransparent }) >$< sendCommand)
+                    text "SPDIF transparent"
+                el "label" [class_ "mdc-typography--caption"] do
+                    switch (pure false) (_.midiThru ∘ unwrap ∘ _.mixer ∘ unwrap <$> state) ((\midiThru -> MidiThru { midiThru }) >$< sendCommand)
+                    text "MIDI Thru"
+                el "label" [class_ "mdc-typography--caption"] do
+                    switch (pure false) (_.out12ToSpdif ∘ unwrap ∘ _.stereo ∘ unwrap <$> state) stereoSPDIF
+                    text "Out 1 & 2 to SPDIF"
     where
-        scaleFraction = dbToFraction <$> value
-        dbToFraction = maybe 0.0 $ \db -> ((db + meterRange)/meterRange)
-        meterRange = 100.0
-
-slider :: Dynamic Number -> Callback Number -> Widget Unit
-slider value onChange = do
-    Tuple node _ <- E.el' "div" [E.class_ "mdc-slider", E.class_ "mdc-slider--discrete", E.attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":="0" <> "aria-valuemax":="127")] do
-        E.el "div" [E.class_ "mdc-slider__track-container"] do
-            E.el_ "div" [E.class_ "mdc-slider__track"]
-        E.el "div" [E.class_ "mdc-slider__thumb-container"] do
-            E.el "div" [E.class_ "mdc-slider__pin"] do
-                E.el_ "div" [E.class_ "mdc-slider__pin-value-marker"]
-            rawHtml $ """<svg class="mdc-slider__thumb" width="21" height="21"><circle cx="10.5" cy="10.5" r="7.875"></circle></svg>"""
-            E.el_ "div" [E.class_ "mdc-slider__focus_ring"]
-        E.el "div" [E.class_ "mdc-typography--caption"] $ dynText $ weaken $ showDb <$> value
-    liftEffect $ nextTick $ do
-        slider <- liftEffect $ runEffectFn1 _initSlider node
-        liftEffect $ runEffectFn2 _subscribeSlider slider (triggerCallback onChange)
-        initialValue <- readDynamic value
-        runEffectFn2 _setSliderValue slider initialValue
-        unsub <- runEffectFn2 _subscribeEvent (\val -> runEffectFn2 _setSliderValue slider val) (changed value)
-        pure unit
-        -- onCleanup unsub
-
-checkbox :: Dynamic Boolean -> Callback Boolean -> Widget Unit
-checkbox value onChange = do
-    E.el "div" [E.class_ "mdc-form-field"] do
-        E.el "div" [E.class_ "mdc-checkbox"] do
-            Tuple node _ <-  E.el' "input" [E.attrs ("type":="checkbox"), E.class_ "mdc-checkbox__native-control"] (pure unit)
-            subscribeDyn_ (_setCheckboxChecked node) value
-            changedE <- domEventWithSample (\_ -> _getCheckboxChecked node) "change" node
-            attachEvent changedE onChange
-            E.el "div" [E.class_ "mdc-checkbox__background"] do
-              rawHtml """<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24"><path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg>"""
-              E.el_ "div" [E.class_ "mdc-checkbox__mixedmark"]
-        E.el "label" [] $ text "Mute"
-
-nextTick :: Effect Unit -> Effect Unit
-nextTick = void ∘ setTimeout 0
-
-showDb :: Number -> String
-showDb value = toStringWith (fixed 1) value <> " dB"
-
-foreign import data Slider :: Type
-foreign import _setScaleX :: EffectFn1 Node (EffectFn1 Number Unit)
-foreign import _initSlider :: EffectFn1 Node Slider
-foreign import _subscribeSlider :: EffectFn2 Slider (Number -> Effect Unit) Unit
-foreign import _setSliderValue :: EffectFn2 Slider Number Unit
-
-foreign import _getCheckboxChecked :: Node -> Effect Boolean
-foreign import _setCheckboxChecked :: Node -> Boolean -> Effect Unit
-
-
-
-transform :: Dynamic Number -> Prop
-transform valueD = Prop $ mkEffectFn2 \node cleanups -> do
-    setScaleX <- runEffectFn1 _setScaleX node
-    unsub <- runEffectFn2 _subscribeEvent (runEffectFn1 setScaleX) (changed valueD)
-    pushDelayed cleanups unsub
-    initialClasses <- readDynamic valueD
-    runEffectFn1 setScaleX initialClasses
+    attenuate :: OutputPair -> Callback Int
+    attenuate pair = (\db -> Attenuate { output: pair, db: 127 - db }) >$< sendCommand
+    muteOutput :: OutputPair -> Callback Boolean
+    muteOutput pair = (\enabled -> Mute { output: pair, muted: not enabled }) >$< sendCommand
+    inGain ch = (\highGain -> InGain { input: ch, gainOn: highGain }) >$< sendCommand
+    setStereoMixer = (\stereoMix -> SetStereoMixer { stereoMix }) >$< sendCommand
+    adjustStereoMixer :: Callback (StereoMixer -> StereoMixer)
+    adjustStereoMixer = contramapCallbackDyn ((\state adjustment -> adjustment state) ∘ _.stereo ∘ unwrap <$> state) setStereoMixer
+    stereoSPDIF :: Callback Boolean
+    stereoSPDIF = (\value (StereoMixer mixer) -> StereoMixer (mixer { out12ToSpdif = value })) >$< adjustStereoMixer
+    attenuationSlider = {min: 0, max: 0x7f, discrete: true}
 
 onMsg :: WebSocket -> (String -> Effect Unit) -> (List String -> Effect Unit) -> Effect Unit
 onMsg ws success failure =

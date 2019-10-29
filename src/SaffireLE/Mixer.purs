@@ -10,7 +10,7 @@ type MixValue = Number
 newtype OutOpts
     = OutOpts
     { mute        :: Boolean
-    , attenuation :: Number
+    , attenuation :: Int
     }
 
 derive instance newtypeOutOpts :: Newtype OutOpts _
@@ -55,9 +55,9 @@ defaultMixer =
     , highResMixer: H.defaultMixer
     , in3Gain: false
     , in4Gain: false
-    , out12Opts: OutOpts { mute: false, attenuation: 0.0}
-    , out34Opts: OutOpts { mute: false, attenuation: 0.0}
-    , out56Opts: OutOpts { mute: false, attenuation: 0.0}
+    , out12Opts: OutOpts { mute: false, attenuation: 0}
+    , out34Opts: OutOpts { mute: false, attenuation: 0}
+    , out56Opts: OutOpts { mute: false, attenuation: 0}
     , midiThru: false
     , spdifTransparent: false
     }
