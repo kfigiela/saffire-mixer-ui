@@ -10,3 +10,5 @@ output
 .pulp-cache
 .set
 .psc-package
+.purs-fast-bundle-cache
+

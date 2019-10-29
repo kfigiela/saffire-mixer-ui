@@ -3,5 +3,7 @@
         ".psc-ide-port": true,
         ".pulp-pcache": true,
         "output": true
-    }
+    },
+    "editor.autoIndent": false,
+    "editor.renderIndentGuides": false
 }

@@ -2195,82 +2195,6 @@
     "repo": "https://github.com/krisajenkins/purescript-remotedata.git",
     "version": "v4.2.0"
   },
-  "restaumatic-common": {
-    "dependencies": [
-      "affjax",
-      "datetime",
-      "effect",
-      "foreign",
-      "foreign-extra",
-      "foreign-generic",
-      "jack",
-      "jquery",
-      "js-date",
-      "now",
-      "numbers",
-      "parsing",
-      "record-extra",
-      "restaumatic-prelude",
-      "specular",
-      "validation",
-      "variant"
-    ],
-    "repo": "../../restaumatic-common",
-    "version": "LATEST"
-  },
-  "restaumatic-core-types": {
-    "dependencies": [
-      "datetime",
-      "either",
-      "foreign",
-      "foreign-generic",
-      "prelude",
-      "restaumatic-common",
-      "restaumatic-core-types-sites",
-      "restaumatic-prelude"
-    ],
-    "repo": "../../restaumatic-core-types",
-    "version": "LATEST"
-  },
-  "restaumatic-core-types-sites": {
-    "dependencies": [
-      "datetime",
-      "either",
-      "foreign",
-      "foreign-generic",
-      "prelude",
-      "restaumatic-common",
-      "restaumatic-prelude",
-      "restaumatic-promotions-engine"
-    ],
-    "repo": "../../restaumatic-core-types-sites",
-    "version": "LATEST"
-  },
-  "restaumatic-prelude": {
-    "dependencies": [
-      "either",
-      "foldable-traversable",
-      "newtype",
-      "prelude",
-      "tuples"
-    ],
-    "repo": "../../restaumatic-prelude",
-    "version": "LATEST"
-  },
-  "restaumatic-promotions-engine": {
-    "dependencies": [
-      "arrays",
-      "foreign-extra",
-      "foreign-generic",
-      "generics-rep",
-      "ordered-collections",
-      "prelude",
-      "restaumatic-common",
-      "restaumatic-prelude"
-    ],
-    "repo": "../../promotions-engine",
-    "version": "LATEST"
-  },
   "result": {
     "dependencies": [
       "either",
@@ -2543,8 +2467,8 @@
       "unsafe-coerce",
       "unsafe-reference"
     ],
-    "repo": "https://github.com/restaumatic/purescript-specular.git",
-    "version": "v0.6.2"
+    "repo": "../../../restaumatic/purescript-specular",
+    "version": "LATEST"
   },
   "st": {
     "dependencies": [
