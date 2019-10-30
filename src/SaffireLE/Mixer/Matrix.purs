@@ -6,8 +6,7 @@ import SPrelude
 type MixValue = Number
 
 -- | 44.1 kHz and 48 kHz sample rate mixers
-newtype MatrixMixer
-    = MatrixMixer
+type MatrixMixer =
     { out1         :: Mix
     , out2         :: Mix
     , out3         :: Mix
@@ -15,19 +14,7 @@ newtype MatrixMixer
     , out12ToSpdif :: Boolean
     }
 
-derive instance newtypeMatrixMixer :: Newtype MatrixMixer _
-derive instance genericMatrixMixer :: Generic MatrixMixer _
-instance showMatrixMixer :: Show MatrixMixer where
-  show = genericShow
-instance eqMatrixMixer :: Eq MatrixMixer where
-  eq = genericEq
-instance decodeMatrixMixer :: Decode MatrixMixer where
-  decode = genericDecode encodingOpts
-instance encodeMatrixMixer :: Encode MatrixMixer where
-  encode = genericEncode encodingOpts
-
-newtype Mix
-    = Mix
+type Mix =
     { dac1   :: MixValue
     , dac2   :: MixValue
     , dac3   :: MixValue
@@ -44,22 +31,10 @@ newtype Mix
     , spdif2 :: MixValue
     }
 
-derive instance newtypeMix :: Newtype Mix _
-derive instance genericMix :: Generic Mix _
-instance showMix :: Show Mix where
-  show = genericShow
-instance eqMix :: Eq Mix where
-  eq = genericEq
-instance decodeMix :: Decode Mix where
-  decode = genericDecode encodingOpts
-instance encodeMix :: Encode Mix where
-  encode = genericEncode encodingOpts
-
 --
 
 defaultMix :: Mix
 defaultMix =
-    Mix
     { dac1: 0.0
     , dac2: 0.0
     , dac3: 0.0
@@ -78,7 +53,6 @@ defaultMix =
 
 defaultMixer :: MatrixMixer
 defaultMixer =
-    MatrixMixer
     { out1: defaultMix
     , out2: defaultMix
     , out3: defaultMix
