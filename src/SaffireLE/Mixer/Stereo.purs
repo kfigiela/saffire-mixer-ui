@@ -4,26 +4,13 @@ import SPrelude
 
 type MixValue = Number
 
-newtype StereoMixer
-    = StereoMixer
+type StereoMixer =
     { stereo1      :: StereoMix
     , stereo2      :: StereoMix
     , out12ToSpdif :: Boolean
     }
 
-derive instance newtypeStereoMixer :: Newtype StereoMixer _
-derive instance genericStereoMixer :: Generic StereoMixer _
-instance showStereoMixer :: Show StereoMixer where
-  show = genericShow
-instance eqStereoMixer :: Eq StereoMixer where
-  eq = genericEq
-instance decodeStereoMixer :: Decode StereoMixer where
-  decode = genericDecode encodingOpts
-instance encodeStereoMixer :: Encode StereoMixer where
-  encode = genericEncode encodingOpts
-
-newtype StereoMix
-    = StereoMix
+type StereoMix =
     { stereoDAC12   :: StereoMixValue
     , stereoDAC34   :: StereoMixValue
     , stereoDAC56   :: StereoMixValue
@@ -35,35 +22,11 @@ newtype StereoMix
     , dacMix        :: Number
     }
 
-derive instance newtypeStereoMix :: Newtype StereoMix _
-derive instance genericStereoMix :: Generic StereoMix _
-instance showStereoMix :: Show StereoMix where
-  show = genericShow
-instance eqStereoMix :: Eq StereoMix where
-  eq = genericEq
-instance decodeStereoMix :: Decode StereoMix where
-  decode = genericDecode encodingOpts
-instance encodeStereoMix :: Encode StereoMix where
-  encode = genericEncode encodingOpts
-
--- | Represents mix of stereo channel
-newtype ChannelMix
-    = ChannelMix
+type ChannelMix =
     { volume  :: MixValue
     , balance :: MixValue
     , enabled :: Boolean
     }
-
-derive instance newtypeChannelMix :: Newtype ChannelMix _
-derive instance genericChannelMix :: Generic ChannelMix _
-instance showChannelMix :: Show ChannelMix where
-  show = genericShow
-instance eqChannelMix :: Eq ChannelMix where
-  eq = genericEq
-instance decodeChannelMix :: Decode ChannelMix where
-  decode = genericDecode encodingOpts
-instance encodeChannelMix :: Encode ChannelMix where
-  encode = genericEncode encodingOpts
 
 data StereoMixValue
     = StereoPair
@@ -74,9 +37,9 @@ data StereoMixValue
     , ch2Volume :: ChannelMix
     }
 
-defEnabledStereoMix = StereoPair { ch12Volume: ChannelMix { volume: 1.0, balance: 0.0, enabled: true}} :: StereoMixValue
-defDisabledStereoMix = StereoPair { ch12Volume: ChannelMix { volume: 0.0, balance: 0.0, enabled: false}} :: StereoMixValue
-defDisabledMonoMix = MonoPair { ch1Volume: ChannelMix { volume: 0.0, balance: 0.0, enabled: false}, ch2Volume: ChannelMix { volume: 0.0, balance: 0.0, enabled: false}} :: StereoMixValue
+defEnabledStereoMix = StereoPair { ch12Volume: { volume: 1.0, balance: 0.0, enabled: true}} :: StereoMixValue
+defDisabledStereoMix = StereoPair { ch12Volume: { volume: 0.0, balance: 0.0, enabled: false}} :: StereoMixValue
+defDisabledMonoMix = MonoPair { ch1Volume: { volume: 0.0, balance: 0.0, enabled: false}, ch2Volume: { volume: 0.0, balance: 0.0, enabled: false}} :: StereoMixValue
 
 derive instance genericStereoMixValue :: Generic StereoMixValue _
 instance showStereoMixValue :: Show StereoMixValue where
@@ -91,9 +54,7 @@ instance encodeStereoMixValue :: Encode StereoMixValue where
 
 defaultMixer :: StereoMixer
 defaultMixer =
-    StereoMixer
     { stereo1:
-        StereoMix
         { stereoDAC12: defEnabledStereoMix
         , stereoDAC34: defDisabledStereoMix
         , stereoDAC56: defDisabledStereoMix
@@ -105,7 +66,6 @@ defaultMixer =
         , dacMix: 1.0
         }
     , stereo2:
-        StereoMix
         { stereoDAC12: defDisabledStereoMix
         , stereoDAC34: defEnabledStereoMix
         , stereoDAC56: defDisabledStereoMix

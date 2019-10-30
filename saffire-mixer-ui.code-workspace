@@ -9,6 +9,7 @@
 			".pulp-cache": true
 		},
 		"purescript.addNpmPath": true,
-		"purescript.addPscPackageSources": true
+		"purescript.addPscPackageSources": true,
+		"editor.tabSize": 2
 	}
 }

@@ -5,14 +5,29 @@ import SPrelude
 import Data.Number.Format (fixed, toStringWith)
 import Effect.Class.Console as Logger
 import Effect.Timer (setTimeout)
+import Specular.Callback (contramapCallbackDyn_)
 import Specular.Dom.Browser (Node)
 import Specular.Dom.Builder.Class (domEventWithSample)
+import Specular.Dom.Element (attr, classWhen, dynText, onClick_)
+
+
+-- Toggle / icon button
+
+
+toggle :: {props :: Array Prop, on :: String, off :: String} -> Dynamic Boolean -> Callback Boolean -> Widget Unit
+toggle {props, on, off} value set = do
+  let toggleCb = contramapCallbackDyn_ (not <$> value) set
+  iconButton ([class_ "material-icons"] <> props) toggleCb do
+      dynText $ value <#> if _ then on else off
+
+iconButton :: Array Prop -> Callback Unit -> Widget Unit -> Widget Unit
+iconButton props clickCb = el "button" ([class_ "mdc-icon-button", attr "type" "button", onClick_ clickCb] <> props)
 
 -- Slider
 
-slider :: forall num. Show num => {min :: num, max :: num, discrete :: Boolean} -> Dynamic num -> Callback num -> Widget Unit
-slider {min, max, discrete} value onChange = do
-    Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max)] <> mwhen discrete [class_ "mdc-slider--discrete"]) do
+slider :: forall num. Show num => {min :: num, max :: num, discrete :: Boolean, props :: Array Prop} -> Dynamic num -> Callback num -> Widget Unit
+slider {min, max, discrete, props} value onChange = do
+    Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete"] <> props) do
         el "div" [class_ "mdc-slider__track-container"] do
             el_ "div" [class_ "mdc-slider__track"]
         el "div" [class_ "mdc-slider__thumb-container"] do

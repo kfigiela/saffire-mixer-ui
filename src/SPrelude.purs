@@ -83,3 +83,6 @@ whenJust (Just a) f = f a
 whenJust Nothing _ = pure unit
 
 type Widget_ = Widget Unit
+
+
+-- contraMapDyn' :: Dynamic a -> Callback a -> Callback Unit
