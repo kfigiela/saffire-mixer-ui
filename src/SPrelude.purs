@@ -58,7 +58,7 @@ import Foreign.Generic.EnumEncoding (defaultGenericEnumOptions, genericDecodeEnu
 import Foreign.Generic.Types (Options)
 import Specular.Callback (Callback, attachEvent, contramapCallbackDyn, contramapCallbackDynMaybe, triggerCallback)
 import Specular.Dom.Browser ((:=))
-import Specular.Dom.Element (Prop, attrs, attrsD, classUnlessD, classWhenD, class_, classes, classesD, el, el', el_, rawHtml, text)
+import Specular.Dom.Element (Prop, attrs, attrsD, classUnlessD, classWhenD, class_, classes, classesD, el, el', el_, rawHtml, text, dynText, attr)
 import Specular.Dom.Widget (Widget)
 import Specular.FRP (Dynamic, _subscribeEvent, changed, readDynamic, subscribeDyn_)
 import Specular.Ref (newRef, refUpdate, refUpdateConst, refValue)

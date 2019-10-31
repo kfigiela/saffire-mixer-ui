@@ -78,3 +78,44 @@ defaultMixer =
         }
     , out12ToSpdif: false
     }
+
+---
+
+stereoMixValueToStereo :: StereoMixValue -> Maybe ChannelMix
+stereoMixValueToStereo (StereoPair { ch12Volume: mix }) = Just mix
+stereoMixValueToStereo _ = Nothing
+
+stereoMixValueToMono :: StereoMixValue -> Maybe {ch1 :: ChannelMix, ch2 :: ChannelMix}
+stereoMixValueToMono (MonoPair { ch1Volume: ch1, ch2Volume: ch2 }) = Just {ch1, ch2}
+stereoMixValueToMono _ = Nothing
+
+---
+
+adjustStereoChannelMix :: (ChannelMix -> ChannelMix) -> StereoMixValue -> StereoMixValue
+adjustStereoChannelMix adjustment (StereoPair { ch12Volume }) = StereoPair { ch12Volume: adjustment ch12Volume }
+adjustStereoChannelMix _ mono = mono
+
+adjustMonoChannelMix :: (ChannelMix -> ChannelMix) -> (ChannelMix -> ChannelMix) -> StereoMixValue -> StereoMixValue
+adjustMonoChannelMix adjustment1 adjustment2 (MonoPair { ch1Volume, ch2Volume }) = MonoPair { ch1Volume: adjustment1 ch1Volume, ch2Volume: adjustment2 ch2Volume }
+adjustMonoChannelMix _ _ stereo = stereo
+
+adjustMonoChannel1Mix :: (ChannelMix -> ChannelMix) -> StereoMixValue -> StereoMixValue
+adjustMonoChannel1Mix adjustment = adjustMonoChannelMix adjustment identity
+
+adjustMonoChannel2Mix :: (ChannelMix -> ChannelMix) -> StereoMixValue -> StereoMixValue
+adjustMonoChannel2Mix adjustment = adjustMonoChannelMix identity adjustment
+
+toggleChannelMix :: StereoMixValue -> StereoMixValue
+toggleChannelMix (MonoPair { ch1Volume:  { volume: v1, enabled: e1 }, ch2Volume: { volume: v2, enabled: e2 } }) =
+  StereoPair
+  { ch12Volume:
+    { volume: (v1 + v2)/2.0
+    , balance: 0.0
+    , enabled: e1 || e2
+    }
+  }
+toggleChannelMix (StereoPair { ch12Volume: { volume, enabled } }) =
+  MonoPair
+  { ch1Volume: { volume, enabled, balance: 0.0 }
+  , ch2Volume: { volume, enabled, balance: 0.0 }
+  }

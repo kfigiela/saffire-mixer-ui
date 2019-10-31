@@ -58,7 +58,7 @@ checkbox value onChange = do
         rawCheckbox value onChange [class_ "mdc-checkbox__native-control"]
         el "div" [class_ "mdc-checkbox__background"] do
           rawHtml """<svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24"><path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg>"""
-          el_ "div" [class_ "mdc-checkbox__mixedmark"]
+          el "div" [class_ "mdc-checkbox__mixedmark"] emptyWidget
 
 switch :: Dynamic Boolean -> Dynamic Boolean -> Callback Boolean -> Widget Unit
 switch disabled value onChange = do
