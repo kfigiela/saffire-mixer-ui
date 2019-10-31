@@ -9,6 +9,7 @@ import Specular.Callback (contramapCallbackDyn_)
 import Specular.Dom.Browser (Node)
 import Specular.Dom.Builder.Class (domEventWithSample)
 import Specular.Dom.Element (attr, classWhen, dynText, onClick_)
+import Specular.Dom.Widget (emptyWidget)
 
 
 -- Toggle / icon button
@@ -29,12 +30,12 @@ slider :: forall num. Show num => {min :: num, max :: num, discrete :: Boolean, 
 slider {min, max, discrete, props} value onChange = do
     Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete"] <> props) do
         el "div" [class_ "mdc-slider__track-container"] do
-            el_ "div" [class_ "mdc-slider__track"]
+            el "div" [class_ "mdc-slider__track"] emptyWidget
         el "div" [class_ "mdc-slider__thumb-container"] do
             when discrete $ el "div" [class_ "mdc-slider__pin"] do
-                el_ "div" [class_ "mdc-slider__pin-value-marker"]
+                el "div" [class_ "mdc-slider__pin-value-marker"] emptyWidget
             rawHtml $ """<svg class="mdc-slider__thumb" width="21" height="21"><circle cx="10.5" cy="10.5" r="7.875"></circle></svg>"""
-            el_ "div" [class_ "mdc-slider__focus_ring"]
+            el "div" [class_ "mdc-slider__focus_ring"] emptyWidget
     liftEffect $ nextTick $ do
         mdcSlider <- liftEffect $ runEffectFn1 _initSlider node
         liftEffect $ runEffectFn2 _subscribeSlider mdcSlider (triggerCallback onChange)
@@ -62,7 +63,7 @@ checkbox value onChange = do
 switch :: Dynamic Boolean -> Dynamic Boolean -> Callback Boolean -> Widget Unit
 switch disabled value onChange = do
     el "div" [class_ "mdc-switch", classWhenD value "mdc-switch--checked", classWhenD disabled "mdc-switch--disabled"] do
-        el_ "div" [class_ "mdc-switch__track"]
+        el "div" [class_ "mdc-switch__track"] emptyWidget
         el "div" [class_ "mdc-switch__thumb-underlay"] do
             el "div" [class_ "mdc-switch__thumb"] do
                 rawCheckbox value onChange [class_ "mdc-checkbox__native-control", attrs ("role":="switch"), attrsD ((if _ then ("disabled":="disabled") else mempty) <$> disabled)]
