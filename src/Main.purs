@@ -7,32 +7,25 @@ import Data.Bifunctor (lmap)
 import Data.Int (floor, toNumber)
 import Data.List (List, singleton)
 import Data.List.NonEmpty (toList)
-import Data.Number.Format (fixed, toStringWith)
 import Foreign (readString, renderForeignError)
 import Foreign.Generic (decodeJSON, encodeJSON)
-import Foreign.NullOrUndefined (undefined)
 import Logger as Logger
 import MDC.Widgets (slider, switch, toggle)
-import SaffireLE.Mixer (MixerState(..))
-import SaffireLE.Mixer.Stereo (ChannelMix(..), StereoMix, StereoMixValue(..), StereoMixer(..))
-import SaffireLE.Server (InputChannel(..), MixerCmd(..), OutputPair(..), SaffireStatus(..), State(..), defaultState)
-import SaffireLE.Status (DeviceStatus(..), VUMeter, VUMeters(..), defaultDeviceStatus)
+import SaffireLE.Mixer (MixerState)
+import SaffireLE.Mixer.Stereo (ChannelMix, StereoMix, StereoMixValue(..), StereoMixer)
+import SaffireLE.Server (InputChannel(..), MixerCmd(..), OutputPair(..), SaffireStatus(..), State, defaultState)
+import SaffireLE.Status (DeviceStatus, VUMeters, defaultDeviceStatus)
 import SaffireLE.UI.VUMeter (vuMeter)
-import Specular.Callback (contramapCallbackDyn_, mkCallback, nullCallback)
-import Specular.Dom.Builder.Class as Specular
+import Specular.Callback (mkCallback)
 import Specular.Dom.Element (attr, dynText)
-import Specular.Dom.Element as E
 import Specular.Dom.Widget (Widget, emptyWidget, runMainWidgetInBody)
-import Specular.FRP (dynamic_, newDynamic, whenJustD)
-import Specular.FRP as Specular
+import Specular.FRP (newDynamic, whenJustD)
 import Web.Event.Event (Event)
 import Web.Event.EventTarget (addEventListener, eventListener)
-import Web.HTML.HTMLMediaElement (volume)
-import Web.Socket.Event.EventTypes as WS
+import Web.Socket.Event.EventTypes (onMessage) as WS
 import Web.Socket.Event.MessageEvent (MessageEvent, fromEvent, data_)
 import Web.Socket.WebSocket (WebSocket)
-import Web.Socket.WebSocket as WS
-
+import Web.Socket.WebSocket (create, sendString, toEventTarget) as WS
 
 main :: Effect Unit
 main = runMainWidgetInBody do
@@ -249,9 +242,10 @@ adjustMonoChannel2Mix :: (ChannelMix -> ChannelMix) -> StereoMixValue -> StereoM
 adjustMonoChannel2Mix adjustment = adjustMonoChannelMix identity adjustment
 
 toggleChannelMix :: StereoMixValue -> StereoMixValue
-toggleChannelMix (MonoPair { ch1Volume, ch2Volume }) = StereoPair { ch12Volume: ch1Volume }
-toggleChannelMix (StereoPair { ch12Volume }) = MonoPair { ch1Volume: ch12Volume, ch2Volume: ch12Volume }
-
+toggleChannelMix (MonoPair { ch1Volume:  { volume: v1, enabled: e1 }, ch2Volume: { volume: v2, enabled: e2 } }) =
+  StereoPair { ch12Volume: { volume: (v1+v2)/2.0, balance: 0.0, enabled: e1 || e2 } }
+toggleChannelMix (StereoPair { ch12Volume: { volume, enabled } }) =
+  MonoPair { ch1Volume: { volume, enabled, balance: 0.0 }, ch2Volume: { volume, enabled, balance: 0.0 } }
 
 onMsg :: WebSocket -> (String -> Effect Unit) -> (List String -> Effect Unit) -> Effect Unit
 onMsg ws success failure =
