@@ -10,8 +10,8 @@ type MixValue = Number
 
 -- | 88.2 kHz and 96 kHz sample rate mixers
 type StereoMixer =
-    { out12        :: Mix
-    , out34        :: Mix
+    { stereo1      :: Mix
+    , stereo2      :: Mix
     , recMix       :: RecMix
     , out12ToSpdif :: Boolean
     }
@@ -33,12 +33,12 @@ type RecMix =
 
 defaultMixer :: StereoMixer
 defaultMixer =
-    { out12:
+    { stereo1:
         { dac12: { volume: 1.0, balance: 0.0, enabled: true}
         , dac34: { volume: 1.0, balance: 0.0, enabled: false}
         , recMix: { volume: 1.0, balance: 0.0, enabled: false}
         }
-    , out34:
+    , stereo2:
         { dac12: { volume: 1.0, balance: 0.0, enabled: false}
         , dac34: { volume: 1.0, balance: 0.0, enabled: true}
         , recMix: { volume: 1.0, balance: 0.0, enabled: false}
