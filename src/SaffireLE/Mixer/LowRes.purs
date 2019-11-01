@@ -1,4 +1,4 @@
-module SaffireLE.Mixer.Stereo where
+module SaffireLE.Mixer.LowRes where
 
 import SPrelude
 

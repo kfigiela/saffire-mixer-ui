@@ -104,7 +104,7 @@ defaultDeviceStatus =
         , dac4:      Nothing
         }
     , extClockLock: NoSignal
-    , audioOn: Idle
+    , audioOn: NotConnected
     }
 
 data ExternalClockStatus
@@ -121,7 +121,7 @@ instance decodeExternalClockStatus :: Decode ExternalClockStatus where
   decode = genericDecodeEnum defaultGenericEnumOptions
 
 
-data AudioStatus = Idle | Running
+data AudioStatus = Idle | Running | NotConnected
 
 derive instance genericAudioStatus :: Generic AudioStatus _
 instance showAudioStatus :: Show AudioStatus where

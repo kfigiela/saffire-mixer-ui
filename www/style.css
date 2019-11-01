@@ -3,10 +3,6 @@ body {
     margin: 0;
 }
 
-.mdc-top-app-bar {
-    /* position: relative; */
-}
-
 .vu__average {
     transition: 100ms 0ms ease;
 }
@@ -109,8 +105,10 @@ body {
     justify-items: center;
 }
 
-.option-switches__option .mdc-switch {
+.option-switches__option .mdc-switch,
+.option-switches__option .material-icons {
     padding-right: 10px;
+    vertical-align: middle;
 }
 
 .container {
@@ -125,4 +123,8 @@ body {
 
 .container > * {
     width: 100%;
+}
+
+.divider {
+    margin: 0;
 }

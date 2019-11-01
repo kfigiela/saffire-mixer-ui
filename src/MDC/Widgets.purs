@@ -8,7 +8,7 @@ import Effect.Timer (setTimeout)
 import Specular.Callback (contramapCallbackDyn_)
 import Specular.Dom.Browser (Node)
 import Specular.Dom.Builder.Class (domEventWithSample)
-import Specular.Dom.Element (attr, classWhen, dynText, onClick_)
+import Specular.Dom.Element (attr, attrWhen, classWhen, dynText, onClick_)
 import Specular.Dom.Widget (emptyWidget)
 
 
@@ -28,9 +28,10 @@ iconButton props clickCb = el "button" ([class_ "mdc-icon-button", attr "type" "
 
 slider :: forall num. Show num => {min :: num, max :: num, discrete :: Boolean, props :: Array Prop} -> Dynamic num -> Callback num -> Widget Unit
 slider {min, max, discrete, props} value onChange = do
-    Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete"] <> props) do
+    Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete", attrWhen discrete "data-step" "1"] <> props) do
         el "div" [class_ "mdc-slider__track-container"] do
             el "div" [class_ "mdc-slider__track"] emptyWidget
+
         el "div" [class_ "mdc-slider__thumb-container"] do
             when discrete $ el "div" [class_ "mdc-slider__pin"] do
                 el "div" [class_ "mdc-slider__pin-value-marker"] emptyWidget

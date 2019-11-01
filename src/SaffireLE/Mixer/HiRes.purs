@@ -3,28 +3,23 @@ module SaffireLE.Mixer.HiRes where
 
 import SPrelude
 
+
+import SaffireLE.Mixer.LowRes (ChannelMix)
+
 type MixValue = Number
 
 -- | 88.2 kHz and 96 kHz sample rate mixers
-type Mixer =
-    { out1         :: LMix
-    , out2         :: RMix
-    , out3         :: LMix
-    , out4         :: RMix
+type StereoMixer =
+    { out12        :: Mix
+    , out34        :: Mix
     , recMix       :: RecMix
     , out12ToSpdif :: Boolean
     }
 
-type LMix =
-    { dac1   :: MixValue
-    , dac3   :: MixValue
-    , recMix :: MixValue
-    }
-
-type RMix =
-    { dac2   :: MixValue
-    , dac4   :: MixValue
-    , recMix :: MixValue
+type Mix =
+    { dac12  :: ChannelMix
+    , dac34  :: ChannelMix
+    , recMix :: ChannelMix
     }
 
 type RecMix =
@@ -36,27 +31,17 @@ type RecMix =
     , spdif2 :: MixValue
     }
 
-defaultMixer :: Mixer
+defaultMixer :: StereoMixer
 defaultMixer =
-    { out1:
-        { dac1: 0.0
-        , dac3: 0.0
-        , recMix: 0.0
+    { out12:
+        { dac12: { volume: 1.0, balance: 0.0, enabled: true}
+        , dac34: { volume: 1.0, balance: 0.0, enabled: false}
+        , recMix: { volume: 1.0, balance: 0.0, enabled: false}
         }
-    , out2:
-        { dac2: 0.0
-        , dac4: 0.0
-        , recMix: 0.0
-        }
-    , out3:
-        { dac1: 0.0
-        , dac3: 0.0
-        , recMix: 0.0
-        }
-    , out4:
-        { dac2: 0.0
-        , dac4: 0.0
-        , recMix: 0.0
+    , out34:
+        { dac12: { volume: 1.0, balance: 0.0, enabled: false}
+        , dac34: { volume: 1.0, balance: 0.0, enabled: true}
+        , recMix: { volume: 1.0, balance: 0.0, enabled: false}
         }
     , recMix:
         { in1: 0.0

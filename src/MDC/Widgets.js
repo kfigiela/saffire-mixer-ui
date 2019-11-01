@@ -16,7 +16,6 @@ exports._setSliderValue = function(slider, value) {
 // getCheckboxChecked :: Node -> IOSync Boolean
 exports._getCheckboxChecked = function(node) {
   return function() {
-    console.log("read")
     return node.checked;
   };
 };

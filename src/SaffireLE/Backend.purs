@@ -9,7 +9,8 @@ import Data.List.NonEmpty (toList)
 import Foreign (readString, renderForeignError)
 import Foreign.Generic (decodeJSON, encodeJSON)
 import Logger as Logger
-import SaffireLE.Server (MixerCmd, SaffireStatus(..), State, defaultState)
+import SaffireLE.Mixer (MixerState(..), defaultMixerState)
+import SaffireLE.Server (SaffireStatus(..))
 import SaffireLE.Status (DeviceStatus, defaultDeviceStatus)
 import Specular.Callback (mkCallback)
 import Specular.Dom.Widget (Widget)
@@ -21,12 +22,12 @@ import Web.Socket.Event.MessageEvent (MessageEvent, fromEvent, data_)
 import Web.Socket.WebSocket (WebSocket)
 import Web.Socket.WebSocket (create, sendString, toEventTarget) as WS
 
-type Backend = {meters :: Dynamic DeviceStatus, state :: Dynamic State, sendCommand :: Callback MixerCmd}
+type Backend = {meters :: Dynamic DeviceStatus, state :: Dynamic MixerState, updateState :: Callback MixerState}
 
 connectToBackend :: String -> Widget Backend
 connectToBackend url = do
   {dynamic: meters, set: setMeters} <- newDynamic defaultDeviceStatus
-  {dynamic: state,  set: setState} <- newDynamic defaultState
+  {dynamic: state,  set: setState} <- newDynamic defaultMixerState
 
   let handleMessage evt = do
         let msg :: Maybe SaffireStatus
@@ -39,10 +40,10 @@ connectToBackend url = do
   liftEffect $ onMsg ws handleMessage (Logger.error ∘ show)
   -- TODO: Reconnect
 
-  let sendCommand :: Callback MixerCmd
-      sendCommand = mkCallback $ \mixerCmd -> do
+  let updateState :: Callback MixerState
+      updateState = mkCallback $ \mixerCmd -> do
         WS.sendString ws $ encodeJSON mixerCmd
-  pure {meters, state, sendCommand}
+  pure {meters, state, updateState}
 
 onMsg :: WebSocket -> (String -> Effect Unit) -> (List String -> Effect Unit) -> Effect Unit
 onMsg ws success failure = do
