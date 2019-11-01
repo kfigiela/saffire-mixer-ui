@@ -7,7 +7,9 @@ import Data.Number.Format (fixed, toStringWith)
 import MDC.Widgets (slider, switch, toggle)
 import SaffireLE.Backend (Backend)
 import SaffireLE.Mixer (MixerState(..))
+import SaffireLE.Mixer.HiRes as H
 import SaffireLE.Mixer.LowRes (StereoMix, StereoMixValue, StereoMixer, adjustMonoChannel1Mix, adjustMonoChannel2Mix, adjustStereoChannelMix, stereoMixValueToMono, stereoMixValueToStereo, toggleChannelMix)
+import SaffireLE.Mixer.LowRes as L
 import SaffireLE.Status (AudioStatus(..), VUMeters)
 import SaffireLE.UI.VUMeter (vuMeter)
 import Specular.Dom.Element (attr, attrD)
@@ -115,21 +117,20 @@ mainWidget {meters, state, updateState} = do
           el "span" [class_ "material-icons"] $ dynText $ displayAudioOnIcon ∘ _.audioOn ∘ unwrap <$> meters
           dynText $ displayAudioOnLabel ∘ _.audioOn ∘ unwrap <$> meters
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch (pure false) (_.spdifTransparent ∘ unwrap <$> state) $ (\value state -> state { spdifTransparent = value }) >$< adjustState
+          switch (pure false) (_.spdifTransparent ∘ unwrap <$> state) $ (\value -> _ { spdifTransparent = value }) >$< adjustState
           text "SPDIF transparent"
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch (pure false) (_.midiThru ∘ unwrap <$> state) $ (\value state -> state { midiThru = value }) >$< adjustState
+          switch (pure false) (_.midiThru ∘ unwrap <$> state) $ (\value -> _ { midiThru = value }) >$< adjustState
           text "MIDI Thru"
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch (pure false) (_.out12ToSpdif ∘ _.lowResMixer ∘ unwrap <$> state) stereoSPDIF
+          switch (pure false) (_.out12ToSpdif ∘ _.lowResMixer ∘ unwrap <$> state) $ (\value -> _ { lowResMixer { out12ToSpdif = value }, highResMixer { out12ToSpdif = value } }) >$< adjustState
           text "Out 1 & 2 to SPDIF"
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch (pure false) (_.in3Gain ∘ unwrap <$> state) $ (\value state -> state { in3Gain = value }) >$< adjustState
+          switch (pure false) (_.in3Gain ∘ unwrap <$> state) $ (\value -> _ { in3Gain = value }) >$< adjustState
           text "Input 3 high gain"
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch (pure false) (_.in4Gain ∘ unwrap <$> state) $ (\value state -> state { in4Gain = value }) >$< adjustState
+          switch (pure false) (_.in4Gain ∘ unwrap <$> state) $ (\value -> _ { in4Gain = value }) >$< adjustState
           text "Input 4 high gain"
-  -- matrix <$> state
   where
 
   channelGroup body =
@@ -154,20 +155,11 @@ mainWidget {meters, state, updateState} = do
     el "div" [classes ["mdc-layout-grid__cell"]] do
       vuMeter e.name1 $ e.meter1 ∘ _.meters ∘ unwrap <$> meters
       vuMeter e.name2 $ e.meter2 ∘ _.meters ∘ unwrap <$> meters
-
-  -- attenuate :: OutputPair -> Callback Int
-  -- attenuate pair = (\db -> Attenuate { output: pair, db: 127 - db }) >$< sendCommand
-  -- muteOutput :: OutputPair -> Callback Boolean
-  -- muteOutput pair = (\muted -> Mute { output: pair, muted }) >$< sendCommand
-  -- inGain ch = (\highGain -> InGain { input: ch, gainOn: highGain }) >$< sendCommand
-  -- adjustState :: Callback (MixerState -> MixerState)
   adjustState = contramapCallbackDyn ((\state' adjustment -> wrap (adjustment (unwrap state'))) <$> state) updateState
-  -- adjustState adjustment = contramapCallbackDyn (adjustment <$> state) updateState
-
-  adjustStereoMixer :: Callback (StereoMixer -> StereoMixer)
-  adjustStereoMixer = (\adjustment state -> state { lowResMixer = adjustment state.lowResMixer} ) >$< adjustState -- contramapCallbackDyn ((\state' adjustment -> adjustment state') ∘ _.lowResMixer ∘ unwrap <$> state) updateState
-  stereoSPDIF :: Callback Boolean
-  stereoSPDIF = (\value -> _ { out12ToSpdif = value }) >$< adjustStereoMixer
+  adjustLowResMixer :: Callback (L.StereoMixer -> L.StereoMixer)
+  adjustLowResMixer = (\adjustment state' -> state' { lowResMixer = adjustment state'.lowResMixer} ) >$< adjustState
+  adjustHiResMixer :: Callback (H.StereoMixer -> H.StereoMixer)
+  adjustHiResMixer = (\adjustment state' -> state' { highResMixer = adjustment state'.highResMixer} ) >$< adjustState
   attenuationSlider value = slider {min: 0, max: 0x7f, discrete: true, props: [attrD "title" (attenuationTitle <$> value)]} value
   attenuationTitle volume = "Volume " <> show volume
   volumeSlider  value = slider {min:  0.0, max: 1.0, discrete: false, props: [attrD "title" (volumeTitle <$> value)]} value
@@ -188,7 +180,7 @@ mainWidget {meters, state, updateState} = do
     el "div" [class_ "mix-control"] do
       let
         modify' :: Callback (StereoMixValue -> StereoMixValue)
-        modify' = modify >$< adjustStereoMixer
+        modify' = modify >$< adjustLowResMixer
       let mix = get ∘ _.lowResMixer ∘ unwrap <$> state
       let isStereo = isJust ∘ stereoMixValueToStereo <$> mix
       toggle {props: [class_ "mix-control__link", attr "title" "Link as stereo channel"], on: "link", off: "link_off"} isStereo (const toggleChannelMix >$< modify')
