@@ -12,11 +12,7 @@ type OutOpts =
     , attenuation :: Int
     }
 
-
-newtype MixerState
-    = MixerState MixerState'
-
-type MixerState' =
+type MixerState =
     { lowResMixer      :: L.StereoMixer
     , highResMixer     :: H.StereoMixer
     , in3Gain          :: Boolean
@@ -28,20 +24,8 @@ type MixerState' =
     , spdifTransparent :: Boolean
     }
 
-derive instance newtypeMixerState :: Newtype MixerState _
-derive instance genericMixerState :: Generic MixerState _
-instance showMixerState :: Show MixerState where
-  show = genericShow
-instance eqMixerState :: Eq MixerState where
-  eq = genericEq
-instance decodeMixerState :: Decode MixerState where
-  decode = genericDecode encodingOpts
-instance encodeMixerState :: Encode MixerState where
-  encode = genericEncode encodingOpts
---
 defaultMixerState :: MixerState
 defaultMixerState =
-    MixerState
     { lowResMixer: L.defaultMixer
     , highResMixer: H.defaultMixer
     , in3Gain: false

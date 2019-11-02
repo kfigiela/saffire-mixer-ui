@@ -6,7 +6,7 @@ import Data.Int (round)
 import Data.Number.Format (fixed, toStringWith)
 import MDC.Widgets (slider, switch, toggle, toggle')
 import SaffireLE.Backend (Backend)
-import SaffireLE.Mixer (MixerState')
+import SaffireLE.Mixer (MixerState)
 import SaffireLE.Mixer.HiRes as H
 import SaffireLE.Mixer.LowRes (ChannelMix, adjustMonoChannel1Mix, adjustMonoChannel2Mix, adjustStereoChannelMix, stereoMixValueToMono, stereoMixValueToStereo, toggleChannelMix)
 import SaffireLE.Mixer.LowRes as L
@@ -216,11 +216,10 @@ mainWidget {meters, state, updateState, persistState} = do
           channelMixControls $ Ref (_.ch1 <$> mono) (adjustMonoChannel1Mix >$< refUpdate ref)
           channelMixControls $ Ref (_.ch2 <$> mono) (adjustMonoChannel2Mix >$< refUpdate ref)
 
-  adjustState = contramapCallbackDyn ((\state' adjustment -> wrap (adjustment (unwrap state'))) <$> state) updateState
-  stateRef :: Ref MixerState'
-  stateRef = Ref (unwrap <$> state) adjustState
-
-
+  adjustState :: Callback (MixerState -> MixerState)
+  adjustState = contramapCallbackDyn ((\state' adjustment -> adjustment state') <$> state) updateState
+  stateRef :: Ref MixerState
+  stateRef = Ref state adjustState
   attenuationSlider ref = slider {min: 0, max: 0x7f, discrete: true, props: [attrD "title" (attenuationTitle <$> refValue ref)]} ref
   attenuationTitle volume = "Volume " <> show volume
   volumeSlider ref = slider {min:  0.0, max: 1.0, discrete: false, props: [attrD "title" (volumeTitle <$> refValue ref)]} ref
@@ -235,14 +234,6 @@ mainWidget {meters, state, updateState, persistState} = do
   displayAudioOnIcon Idle = "pause"
   displayAudioOnIcon Running = "play_arrow"
   displayAudioOnIcon NotConnected = "error_outline"
-
-header :: Widget Unit
-header = do
-  el "header" [classes ["mdc-top-app-bar", "mdc-top-app-bar--fixed"], attr "style" "top: 0px;"] do
-    el "div" [class_ "mdc-top-app-bar__row"] do
-      el "section" [classes ["mdc-top-app-bar__section", "mdc-top-app-bar__section--align-start"]] do
-        el "button" [classes ["mdc-icon-button", "material-icons", "mdc-top-app-bar__navigation-icon"]] $ text "menu"
-        el "span" [class_ "mdc-top-app-bar__title"] $ text "Focusrite SaffireLE reboot"
 
 -- "Lenses"
 lowResMixer :: forall e t. Ref { lowResMixer :: t | e } -> Ref t
