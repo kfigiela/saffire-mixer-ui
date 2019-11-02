@@ -5,7 +5,7 @@ import SPrelude
 import SaffireLE.Backend (connectToBackend)
 import SaffireLE.UI.MainScreen (mainWidget)
 import Specular.Dom.Widget (runMainWidgetInBody)
-import Specular.FRP (whenJustD, withDynamic_)
+import Specular.FRP (withDynamic_)
 
 main :: Effect Unit
 main = runMainWidgetInBody do

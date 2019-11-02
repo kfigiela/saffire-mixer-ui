@@ -122,10 +122,14 @@ mainWidget {meters, state, updateState, persistState} = do
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
           switch $ midiThru stateRef
           text "MIDI Thru"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch $ out12ToSpdif $ lowResMixer stateRef
-          switch $ out12ToSpdif $ highResMixer stateRef
-          text "Out 1 & 2 to SPDIF"
+        whenSD do
+          el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+            switch $ out12ToSpdif $ lowResMixer stateRef
+            text "Out 1 & 2 to SPDIF"
+        whenHD do
+          el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+            switch $ out12ToSpdif $ highResMixer stateRef
+            text "Out 1 & 2 to SPDIF"
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
           switch $ in3Gain stateRef
           text "Input 3 high gain"
