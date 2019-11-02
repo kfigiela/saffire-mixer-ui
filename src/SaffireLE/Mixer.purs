@@ -12,8 +12,11 @@ type OutOpts =
     , attenuation :: Int
     }
 
+
 newtype MixerState
-    = MixerState
+    = MixerState MixerState'
+
+type MixerState' =
     { lowResMixer      :: L.StereoMixer
     , highResMixer     :: H.StereoMixer
     , in3Gain          :: Boolean

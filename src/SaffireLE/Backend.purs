@@ -56,13 +56,19 @@ connectToBackend url retryConnection = do
     onMsg ws handleMessage (Logger.error ∘ show)
 
     onCloseL <- eventListener \_ -> do
+      Logger.error "onClose"
       updateBackend Nothing
-      setTimeout 1_000 $ triggerCallback retryConnection unit
+      setTimeout 1_000 $ do
+        Logger.error "retryClose"
+        triggerCallback retryConnection unit
     addEventListener WS.onClose onCloseL false (WS.toEventTarget ws)
 
     onErrorL <- eventListener \_ -> do
+      Logger.error "onError"
       updateBackend Nothing
-      setTimeout 1_000 $ triggerCallback retryConnection unit
+      setTimeout 1_000 $ do
+        Logger.error "retryError"
+        triggerCallback retryConnection unit
     addEventListener WS.onError onErrorL false (WS.toEventTarget ws)
 
     onOpenL <- eventListener \_ -> updateBackend $ Just {meters, state, updateState, persistState}

@@ -2,38 +2,9 @@ module SaffireLE.Status where
 
 import SPrelude
 
-data VUMeter
-    = In1
-    | In3
-    | SpdifIn1
-    | In2
-    | In4
-    | SpdifIn2
-    | Out1
-    | Out3
-    | Out5
-    | SpdifOut7
-    | Out2
-    | Out4
-    | Out6
-    | SpdifOut8
-    | DAC1
-    | DAC3
-    | DAC2
-    | DAC4
-
-derive instance genericVUMeter :: Generic VUMeter _
-instance showVUMeter :: Show VUMeter where
-  show = genericShow
-instance eqVUMeter :: Eq VUMeter where
-  eq = genericEq
-instance decodeVUMeter :: Decode VUMeter where
-  decode = genericDecodeEnum defaultGenericEnumOptions
-
 type MeterValue = Maybe Number
 
-newtype VUMeters
-    = VUMeters
+type VUMeters =
     { in1       :: MeterValue
     , in3       :: MeterValue
     , spdifIn1  :: MeterValue
@@ -54,36 +25,15 @@ newtype VUMeters
     , dac4      :: MeterValue
     }
 
-derive instance newtypeVUMeters :: Newtype VUMeters _
-derive instance genericVUMeters :: Generic VUMeters _
-instance showVUMeters :: Show VUMeters where
-  show = genericShow
-instance eqVUMeters :: Eq VUMeters where
-  eq = genericEq
-instance decodeVUMeters :: Decode VUMeters where
-  decode = genericDecode encodingOpts
-
-newtype DeviceStatus
-    = DeviceStatus
+type DeviceStatus =
     { meters       :: VUMeters
     , extClockLock :: ExternalClockStatus
     , audioOn      :: AudioStatus
     }
 
-derive instance newtypeDeviceStatus :: Newtype DeviceStatus _
-derive instance genericDeviceStatus :: Generic DeviceStatus _
-instance showDeviceStatus :: Show DeviceStatus where
-  show = genericShow
-instance eqDeviceStatus :: Eq DeviceStatus where
-  eq = genericEq
-instance decodeDeviceStatus :: Decode DeviceStatus where
-  decode = genericDecode encodingOpts
-
 defaultDeviceStatus :: DeviceStatus
 defaultDeviceStatus =
-    DeviceStatus
     { meters:
-        VUMeters
         { in1:       Nothing
         , in3:       Nothing
         , spdifIn1:  Nothing
