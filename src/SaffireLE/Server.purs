@@ -6,8 +6,8 @@ import SaffireLE.Mixer as M
 import SaffireLE.Status (DeviceStatus)
 
 data SaffireStatus =
-    Meters DeviceStatus
-    | CurrentState M.MixerState
+    Meters { contents :: DeviceStatus }
+    | CurrentState { contents :: M.MixerState }
 
 derive instance genericSaffireStatus :: Generic SaffireStatus _
 instance showSaffireStatus :: Show SaffireStatus where
@@ -19,7 +19,7 @@ instance decodeSaffireStatus :: Decode SaffireStatus where
 
 
 data UICmd  =
-    UpdateState M.MixerState
+    UpdateState { state :: M.MixerState }
     | PersistState
 
 derive instance genericUICmd  :: Generic UICmd  _

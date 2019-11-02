@@ -1,13 +1,14 @@
 module SaffireLE.Backend where
 
+import Logger
 import SPrelude
 
 import Control.Monad.Except (runExcept)
 import Data.Bifunctor (lmap)
 import Data.List (List, singleton)
-import Data.List.NonEmpty (toList)
+import Data.List.NonEmpty (NonEmptyList(..), toList)
 import Effect.Timer (setTimeout)
-import Foreign (readString, renderForeignError)
+import Foreign (ForeignError(..), readString, renderForeignError)
 import Foreign.Generic (decodeJSON, encodeJSON)
 import Logger as Logger
 import SaffireLE.Mixer (MixerState, defaultMixerState)
@@ -39,16 +40,18 @@ connectToBackend url retryConnection = do
   {dynamic: state,  set: setState} <- newDynamic defaultMixerState
 
   let handleMessage evt = do
-        let msg :: Maybe SaffireStatus
-            msg = hush $ runExcept $ decodeJSON evt
-        whenJust msg $ case _ of
-          Meters metersData -> setMeters metersData
-          CurrentState stateData -> setState stateData
+        let eitherMsg :: Either (NonEmptyList ForeignError) SaffireStatus
+            eitherMsg = runExcept $ decodeJSON evt
+        case eitherMsg of
+          Right msg -> case msg of
+            Meters {contents: metersData} -> setMeters metersData
+            CurrentState {contents: stateData} -> setState stateData
+          Left error -> Logger.error $ show error
 
   ws <- liftEffect $ WS.create url []
 
   let updateState :: Callback MixerState
-      updateState = mkCallback $ \mixerCmd -> WS.sendString ws $ encodeJSON $ UpdateState mixerCmd
+      updateState = mkCallback $ \mixerCmd -> WS.sendString ws $ encodeJSON $ UpdateState { state: mixerCmd }
   let persistState :: Callback Unit
       persistState = mkCallback $ \_ -> WS.sendString ws $ encodeJSON PersistState
 
