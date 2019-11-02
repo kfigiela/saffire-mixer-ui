@@ -16,3 +16,16 @@ instance eqSaffireStatus :: Eq SaffireStatus where
   eq = genericEq
 instance decodeSaffireStatus :: Decode SaffireStatus where
   decode = genericDecode encodingOpts
+
+
+data UICmd  =
+    UpdateState M.MixerState
+    | PersistState
+
+derive instance genericUICmd  :: Generic UICmd  _
+instance showUICmd  :: Show UICmd  where
+  show = genericShow
+instance eqUICmd :: Eq UICmd  where
+  eq = genericEq
+instance encodeUICmd :: Encode UICmd  where
+  encode = genericEncode encodingOpts

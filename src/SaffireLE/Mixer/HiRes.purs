@@ -22,13 +22,18 @@ type Mix =
     , recMix :: ChannelMix
     }
 
+type RecMixValue =
+  { enabled :: Boolean
+  , volume :: MixValue
+  }
+
 type RecMix =
-    { in1    :: MixValue
-    , in2    :: MixValue
-    , in3    :: MixValue
-    , in4    :: MixValue
-    , spdif1 :: MixValue
-    , spdif2 :: MixValue
+    { in1    :: RecMixValue
+    , in2    :: RecMixValue
+    , in3    :: RecMixValue
+    , in4    :: RecMixValue
+    , spdif1 :: RecMixValue
+    , spdif2 :: RecMixValue
     }
 
 defaultMixer :: StereoMixer
@@ -44,12 +49,12 @@ defaultMixer =
         , recMix: { volume: 1.0, balance: 0.0, enabled: false}
         }
     , recMix:
-        { in1: 0.0
-        , in2: 0.0
-        , in3: 0.0
-        , in4: 0.0
-        , spdif1: 0.0
-        , spdif2: 0.0
+        { in1: { enabled: false, volume: 0.0 }
+        , in2: { enabled: false, volume: 0.0 }
+        , in3: { enabled: false, volume: 0.0 }
+        , in4: { enabled: false, volume: 0.0 }
+        , spdif1: { enabled: false, volume: 0.0 }
+        , spdif2: { enabled: false, volume: 0.0 }
         }
     , out12ToSpdif: false
     }

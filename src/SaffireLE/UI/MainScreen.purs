@@ -8,16 +8,16 @@ import MDC.Widgets (slider, switch, toggle)
 import SaffireLE.Backend (Backend)
 import SaffireLE.Mixer (MixerState(..))
 import SaffireLE.Mixer.HiRes as H
-import SaffireLE.Mixer.LowRes (StereoMix, StereoMixValue, StereoMixer, adjustMonoChannel1Mix, adjustMonoChannel2Mix, adjustStereoChannelMix, stereoMixValueToMono, stereoMixValueToStereo, toggleChannelMix)
+import SaffireLE.Mixer.LowRes (adjustMonoChannel1Mix, adjustMonoChannel2Mix, adjustStereoChannelMix, stereoMixValueToMono, stereoMixValueToStereo, toggleChannelMix)
 import SaffireLE.Mixer.LowRes as L
 import SaffireLE.Status (AudioStatus(..), VUMeters)
 import SaffireLE.UI.VUMeter (vuMeter)
-import Specular.Dom.Element (attr, attrD)
+import Specular.Dom.Element (attr, attrD, attrWhenD, onClick_)
 import Specular.Dom.Widget (Widget, emptyWidget)
 import Specular.FRP (whenJustD)
 
 mainWidget :: Backend -> Widget Unit
-mainWidget {meters, state, updateState} = do
+mainWidget {meters, state, updateState, persistState} = do
   el "div" [class_ "container"] do
     channelGroup do
       el "div" [class_ "mdc-layout-grid__cell"] do
@@ -25,91 +25,124 @@ mainWidget {meters, state, updateState} = do
         vuMeter "Out 2" $ _.out2 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
         el "div" [class_ "outopts"] do
           el "label" [class_ "outopts__label"] do
-            muteToggle (_.mute ∘ _.out12Opts ∘ unwrap <$> state) $ (\value state -> state { out12Opts { mute = value }}) >$< adjustState
+            muteToggle (_.mute ∘ _.out12Opts ∘ unwrap <$> state) setOut12Mute
           el "div" [class_ "outopts__control"] do
-            attenuationSlider ((127 - _) ∘ _.attenuation ∘ _.out12Opts ∘ unwrap <$> state) $ (\value state -> state { out12Opts { attenuation = 127 - value }}) >$< adjustState
+            attenuationSlider ((127 - _) ∘ _.attenuation ∘ _.out12Opts ∘ unwrap <$> state) setOut12Volume
 
       el "div" [class_ "mdc-layout-grid__cell"] do
         vuMeter "Out 3" $ _.out3 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
         vuMeter "Out 4" $ _.out4 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
         el "div" [class_ "outopts"] do
           el "label" [class_ "outopts__label"] do
-            muteToggle (_.mute ∘ _.out34Opts ∘ unwrap <$> state) $ (\value state -> state { out34Opts { mute = value }}) >$< adjustState
+            muteToggle (_.mute ∘ _.out34Opts ∘ unwrap <$> state) setOut34Mute
           el "div" [class_ "outopts__control"] do
-            attenuationSlider ((127 - _) ∘_.attenuation ∘ _.out34Opts ∘ unwrap <$> state) $ (\value state -> state { out34Opts { attenuation = 127 - value }}) >$< adjustState
+            attenuationSlider ((127 - _) ∘_.attenuation ∘ _.out34Opts ∘ unwrap <$> state) setOut34Volume
       el "div" [class_ "mdc-layout-grid__cell"] do
         vuMeter "Out 5" $ _.out5 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
         vuMeter "Out 6" $ _.out6 ∘ unwrap ∘ _.meters ∘ unwrap <$> meters
         el "div" [class_ "outopts"] do
           el "label" [class_ "outopts__label"] do
-            muteToggle (_.mute ∘ _.out56Opts ∘ unwrap <$> state) $ (\value state -> state { out56Opts { mute = value }}) >$< adjustState
+            muteToggle (_.mute ∘ _.out56Opts ∘ unwrap <$> state) setOut56Mute
           el "div" [class_ "outopts__control"] do
-            attenuationSlider ((127 - _) ∘_.attenuation ∘ _.out56Opts ∘ unwrap <$> state) $ (\value state -> state { out56Opts { attenuation = 127 - value }}) >$< adjustState
+            attenuationSlider ((127 - _) ∘_.attenuation ∘ _.out56Opts ∘ unwrap <$> state) setOut56Volume
 
     divider
 
-    channelGroup $ mixGroupControls
-      { name1: "In 1", name2: "In 2"
-      , meter1: _.in1 ∘ unwrap, meter2: _.in2 ∘ unwrap
-      , stereo:
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoIn12
         , modify: (\adj mix -> mix { stereoIn12 = adj mix.stereoIn12 })
         }
-      }
-    channelGroup $ mixGroupControls
-      { name1: "In 3", name2: "In 4"
-      , meter1: _.in3 ∘ unwrap, meter2: _.in4 ∘ unwrap
-      , stereo:
+      -- mixGroupHiResRecMixControls
+      --   { ch1:
+      --     { get: _.in1
+      --     , modify: (\adj mix -> mix { in1 = adj mix.in1 })
+      --     }
+      --   , ch2:
+      --     { get: _.in2
+      --     , modify: (\adj mix -> mix { in2 = adj mix.in2 })
+      --     }
+      --   }
+      mixGroupMeters
+        { name1: "In 1", name2: "In 2"
+        , meter1: _.in1 ∘ unwrap, meter2: _.in2 ∘ unwrap
+        }
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoIn34
         , modify: (\adj mix -> mix { stereoIn34 = adj mix.stereoIn34 })
         }
-      }
-    channelGroup $ mixGroupControls
-      { name1: "SPDIF 1" , name2: "SPDIF 2"
-      , meter1: _.spdifIn1 ∘ unwrap, meter2: _.spdifIn2 ∘ unwrap
-      , stereo:
+      -- mixGroupHiResRecMixControls
+      --   { ch1:
+      --     { get: _.in3
+      --     , modify: (\adj mix -> mix { in3 = adj mix.in3 })
+      --     }
+      --   , ch2:
+      --     { get: _.in4
+      --     , modify: (\adj mix -> mix { in4 = adj mix.in4 })
+      --     }
+      --   }
+      mixGroupMeters
+        { name1: "In 3", name2: "In 4"
+        , meter1: _.in3 ∘ unwrap, meter2: _.in4 ∘ unwrap
+        }
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoSpdif12
         , modify: (\adj mix -> mix { stereoSpdif12 = adj mix.stereoSpdif12 })
         }
-      }
-
+      -- mixGroupHiResRecMixControls
+      --   { ch1:
+      --     { get: _.spdif1
+      --     , modify: (\adj mix -> mix { spdif1 = adj mix.spdif1 })
+      --     }
+      --   , ch2:
+      --     { get: _.spdif2
+      --     , modify: (\adj mix -> mix { spdif2 = adj mix.spdif2 })
+      --     }
+      --   }
+      mixGroupMeters
+        { name1: "SPDIF 1" , name2: "SPDIF 2"
+        , meter1: _.spdifIn1 ∘ unwrap, meter2: _.spdifIn2 ∘ unwrap
+        }
     divider
 
-    channelGroup $ mixGroupControls
-      { name1: "DAC 1" , name2: "DAC 2"
-      , meter1: _.dac1 ∘ unwrap, meter2: _.dac2 ∘ unwrap
-      , stereo:
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoDAC12
         , modify: (\adj mix -> mix { stereoDAC12 = adj mix.stereoDAC12 })
         }
-      }
-    channelGroup $ mixGroupControls
-      { name1: "DAC 3" , name2: "DAC 4"
-      , meter1: _.dac3 ∘ unwrap, meter2: _.dac4 ∘ unwrap
-      , stereo:
+      mixGroupMeters
+        { name1: "DAC 1" , name2: "DAC 2"
+        , meter1: _.dac1 ∘ unwrap, meter2: _.dac2 ∘ unwrap
+        }
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoDAC34
         , modify: (\adj mix -> mix { stereoDAC34 = adj mix.stereoDAC34 })
         }
-      }
-
-    channelGroup $ mixGroupControls
-      { name1: "DAC 5 / Out 5" , name2: "DAC 6 / Out 5"
-      , meter1: _.out5 ∘ unwrap, meter2: _.out6 ∘ unwrap
-      , stereo:
+      mixGroupMeters
+        { name1: "DAC 3" , name2: "DAC 4"
+        , meter1: _.dac3 ∘ unwrap, meter2: _.dac4 ∘ unwrap
+        }
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoDAC56
         , modify: (\adj mix -> mix { stereoDAC56 = adj mix.stereoDAC56 })
         }
-      }
-
-    channelGroup $ mixGroupControls
-      { name1: "DAC 7 / SPDIF 1" , name2: "DAC 8 / SPDIF 2"
-      , meter1: _.spdifOut7 ∘ unwrap, meter2: _.spdifOut8 ∘ unwrap
-      , stereo:
+      mixGroupMeters
+        { name1: "DAC 5 / Out 5" , name2: "DAC 6 / Out 5"
+        , meter1: _.out5 ∘ unwrap, meter2: _.out6 ∘ unwrap
+        }
+    channelGroup do
+      mixGroupLowResControls
         { get: _.stereoDAC78
         , modify: (\adj mix -> mix { stereoDAC78 = adj mix.stereoDAC78 })
         }
-      }
-
+      mixGroupMeters
+        { name1: "DAC 7 / SPDIF 1" , name2: "DAC 8 / SPDIF 2"
+        , meter1: _.spdifOut7 ∘ unwrap, meter2: _.spdifOut8 ∘ unwrap
+        }
     divider
 
     el "div" [class_ "option-switches"] do
@@ -131,30 +164,89 @@ mainWidget {meters, state, updateState} = do
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
           switch (pure false) (_.in4Gain ∘ unwrap <$> state) $ (\value -> _ { in4Gain = value }) >$< adjustState
           text "Input 4 high gain"
+        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+          el "button" [attr "type" "button", class_ "mdc-button", onClick_ persistState, attrWhenD ((_ == NotConnected) ∘ _.audioOn ∘ unwrap <$> meters) "disabled" "disabled"] $ text "Store settings"
   where
-
+  channelGroup :: Widget Unit -> Widget Unit
   channelGroup body =
     el "div" [class_ "mdc-layout-grid", class_ "channel-group"] do
       el "div" [class_ "mdc-layout-grid__inner"] body
-  mixGroupControls ::
+
+  mixGroupLowResControls ::
+    { get :: L.StereoMix -> L.StereoMixValue
+    , modify :: (L.StereoMixValue -> L.StereoMixValue) -> L.StereoMix -> L.StereoMix
+    }
+    -> Widget Unit
+  mixGroupLowResControls e = do
+    el "div" [classes ["mdc-layout-grid__cell"]] do
+      lowResMixControls (e.get ∘ _.stereo1) $ \adj mixer -> mixer { stereo1 = e.modify adj mixer.stereo1 }
+    el "div" [classes ["mdc-layout-grid__cell"]] do
+      lowResMixControls (e.get ∘ _.stereo2) $ \adj mixer -> mixer { stereo2 = e.modify adj mixer.stereo2 }
+
+  -- mixGroupHiResRecMixControls ::
+  --   { ch1 ::
+  --     { get :: H.RecMix -> H.RecMixValue
+  --     , modify :: (H.RecMixValue -> H.RecMixValue) -> H.RecMix -> H.RecMix
+  --     }
+  --   , ch2 ::
+  --     { get :: H.RecMix -> H.RecMixValue
+  --     , modify :: (H.RecMixValue -> H.RecMixValue) -> H.RecMix -> H.RecMix
+  --     }
+  --   }
+  --   -> Widget Unit
+  -- mixGroupHiResRecMixControls {ch1, ch2} = do
+  --   el "div" [classes ["mdc-layout-grid__cell"]] do
+  --     el "div" [class_ "mix-control"] do
+  --       el "div" [class_ "mix-control__controls"] do
+  --         channelControl ch1
+  --         channelControl ch2
+  --   el "div" [classes ["mdc-layout-grid__cell"]] do emptyWidget
+  --   where
+  --   channelControl { get, modify } = do
+  --     let recMixValue = get ∘ _.recMix ∘ _.highResMixer ∘ unwrap <$> state
+  --         modify' = modify >$< (\adjustment mix -> mix { recMix = adjustment mix.recMix }) >$< adjustHiResMixer
+  --     el "div" [class_ "channel-control"] do
+  --       muteToggle (not ∘ _.enabled <$> recMixValue) $ (\muted   -> (_ { enabled = not muted })) >$< modify'
+  --       volumeSlider (_.volume <$> recMixValue)      $ (\volume  -> (_ { volume = volume })) >$< modify'
+
+  mixGroupMeters ::
     { name1 :: String
     , name2 :: String
     , meter1 :: VUMeters -> Maybe Number
     , meter2 :: VUMeters -> Maybe Number
-    , stereo ::
-      { get :: StereoMix -> StereoMixValue
-      , modify :: (StereoMixValue -> StereoMixValue) -> StereoMix -> StereoMix
-      }
     }
     -> Widget Unit
-  mixGroupControls e = do
-    el "div" [classes ["mdc-layout-grid__cell"]] do
-      mixControls (e.stereo.get ∘ _.stereo1) $ \adj mixer -> mixer { stereo1 = e.stereo.modify adj mixer.stereo1 }
-    el "div" [classes ["mdc-layout-grid__cell"]] do
-      mixControls (e.stereo.get ∘ _.stereo2) $ \adj mixer -> mixer { stereo2 = e.stereo.modify adj mixer.stereo2 }
+  mixGroupMeters e = do
     el "div" [classes ["mdc-layout-grid__cell"]] do
       vuMeter e.name1 $ e.meter1 ∘ _.meters ∘ unwrap <$> meters
       vuMeter e.name2 $ e.meter2 ∘ _.meters ∘ unwrap <$> meters
+
+  lowResMixControls :: (L.StereoMixer -> L.StereoMixValue) -> ((L.StereoMixValue -> L.StereoMixValue) -> L.StereoMixer -> L.StereoMixer) -> Widget Unit
+  lowResMixControls get modify = do
+    el "div" [class_ "mix-control"] do
+      let
+        modify' :: Callback (L.StereoMixValue -> L.StereoMixValue)
+        modify' = modify >$< adjustLowResMixer
+      let mix = get ∘ _.lowResMixer ∘ unwrap <$> state
+      let isStereo = isJust ∘ stereoMixValueToStereo <$> mix
+      toggle {props: [class_ "mix-control__link", attr "title" "Link as stereo channel"], on: "link", off: "link_off"} isStereo (const toggleChannelMix >$< modify')
+
+      el "div" [class_ "mix-control__controls"] do
+        whenJustD (stereoMixValueToStereo <$> mix) $ \stereo -> do
+          el "div" [class_ "channel-control"] do
+            muteToggle (not ∘ _.enabled <$> stereo) $ (\muted   -> adjustStereoChannelMix (_ { enabled = not muted })) >$< modify'
+            volumeSlider (_.volume <$> stereo)   $ (\volume  -> adjustStereoChannelMix (_ { volume = volume })) >$< modify'
+            balanceSlider (_.balance <$> stereo) $ (\balance -> adjustStereoChannelMix (_ { balance = balance })) >$< modify'
+        whenJustD (stereoMixValueToMono <$> mix) $ \mono -> do
+          el "div" [class_ "channel-control"] do
+            muteToggle (not ∘ _.enabled ∘ _.ch1 <$> mono) $ (\muted   -> adjustMonoChannel1Mix (_ { enabled = not muted })) >$< modify'
+            volumeSlider (_.volume ∘ _.ch1 <$> mono)   $ (\volume  -> adjustMonoChannel1Mix (_ { volume  = volume })) >$< modify'
+            balanceSlider (_.balance ∘ _.ch1 <$> mono) $ (\balance -> adjustMonoChannel1Mix (_ { balance = balance })) >$< modify'
+          el "div" [class_ "channel-control"] do
+            muteToggle (not ∘ _.enabled ∘ _.ch2 <$> mono) $ (\muted   -> adjustMonoChannel2Mix (_ { enabled = not muted })) >$< modify'
+            volumeSlider (_.volume ∘ _.ch2 <$> mono)   $ (\volume  -> adjustMonoChannel2Mix (_ { volume  = volume })) >$< modify'
+            balanceSlider (_.balance ∘ _.ch2 <$> mono) $ (\balance -> adjustMonoChannel2Mix (_ { balance = balance })) >$< modify'
+
   adjustState = contramapCallbackDyn ((\state' adjustment -> wrap (adjustment (unwrap state'))) <$> state) updateState
   adjustLowResMixer :: Callback (L.StereoMixer -> L.StereoMixer)
   adjustLowResMixer = (\adjustment state' -> state' { lowResMixer = adjustment state'.lowResMixer} ) >$< adjustState
@@ -174,33 +266,12 @@ mainWidget {meters, state, updateState} = do
   displayAudioOnIcon Idle = "pause"
   displayAudioOnIcon Running = "play_arrow"
   displayAudioOnIcon NotConnected = "error_outline"
-
-  mixControls :: (StereoMixer -> StereoMixValue) -> ((StereoMixValue -> StereoMixValue) -> StereoMixer -> StereoMixer) -> Widget Unit
-  mixControls get modify = do
-    el "div" [class_ "mix-control"] do
-      let
-        modify' :: Callback (StereoMixValue -> StereoMixValue)
-        modify' = modify >$< adjustLowResMixer
-      let mix = get ∘ _.lowResMixer ∘ unwrap <$> state
-      let isStereo = isJust ∘ stereoMixValueToStereo <$> mix
-      toggle {props: [class_ "mix-control__link", attr "title" "Link as stereo channel"], on: "link", off: "link_off"} isStereo (const toggleChannelMix >$< modify')
-
-      el "div" [class_ "mix-control__controls"] do
-        whenJustD (stereoMixValueToStereo <$> mix) $ \stereo -> do
-          el "div" [class_ "channel-control"] do
-            muteToggle (not ∘ _.enabled <$> stereo)     $ (\muted   -> adjustStereoChannelMix (_ { enabled = not muted })) >$< modify'
-            volumeSlider (_.volume <$> stereo)   $ (\volume  -> adjustStereoChannelMix (_ { volume = volume })) >$< modify'
-            balanceSlider (_.balance <$> stereo) $ (\balance -> adjustStereoChannelMix (_ { balance = balance })) >$< modify'
-
-        whenJustD (stereoMixValueToMono <$> mix) $ \mono -> do
-          el "div" [class_ "channel-control"] do
-            muteToggle (not ∘ _.enabled ∘ _.ch1 <$> mono)     $ (\muted   -> adjustMonoChannel1Mix (_ { enabled = not muted })) >$< modify'
-            volumeSlider (_.volume ∘ _.ch1 <$> mono)   $ (\volume  -> adjustMonoChannel1Mix (_ { volume  = volume })) >$< modify'
-            balanceSlider (_.balance ∘ _.ch1 <$> mono) $ (\balance -> adjustMonoChannel1Mix (_ { balance = balance })) >$< modify'
-          el "div" [class_ "channel-control"] do
-            muteToggle (not ∘ _.enabled ∘ _.ch2 <$> mono)     $ (\muted   -> adjustMonoChannel2Mix (_ { enabled = not muted })) >$< modify'
-            volumeSlider (_.volume ∘ _.ch2 <$> mono)   $ (\volume  -> adjustMonoChannel2Mix (_ { volume  = volume })) >$< modify'
-            balanceSlider (_.balance ∘ _.ch2 <$> mono) $ (\balance -> adjustMonoChannel2Mix (_ { balance = balance })) >$< modify'
+  setOut12Mute = (\value -> _ { out12Opts { mute = value }}) >$< adjustState
+  setOut34Mute = (\value -> _ { out34Opts { mute = value }}) >$< adjustState
+  setOut56Mute = (\value -> _ { out56Opts { mute = value }}) >$< adjustState
+  setOut12Volume = (\value -> _ { out12Opts { attenuation = 127 - value }}) >$< adjustState
+  setOut34Volume = (\value -> _ { out34Opts { attenuation = 127 - value }}) >$< adjustState
+  setOut56Volume = (\value -> _ { out56Opts { attenuation = 127 - value }}) >$< adjustState
 
 header :: Widget Unit
 header = do
