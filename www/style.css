@@ -11,7 +11,7 @@ body {
     visibility: visible;
 }
 .vu__peak .mdc-linear-progress__bar-inner {
-    background-color: orange;
+    border-color: orange;
 }
 
 .vu {
@@ -127,4 +127,27 @@ body {
 
 .divider {
     margin: 0;
+}
+
+.vu__meter {
+    position: relative;
+    width: 100%;
+}
+
+.vu__scale {
+    position: relative;
+    width: 100%;
+    /*     height: 20px; */
+    /*     top: 10px; */
+}
+
+.vu__scale > div {
+    position: absolute;
+    /* text-align:center; */
+    white-space: nowrap;
+    /* width: 30px; */
+    /* margin-left: -15px; */
+    /* text-align: center; */
+    border-left:  1px solid black;
+    padding-left: 3px;
 }

@@ -74,6 +74,7 @@ switch ref = do
         el "div" [class_ "mdc-switch__track"] emptyWidget
         el "div" [class_ "mdc-switch__thumb-underlay"] do
             el "div" [class_ "mdc-switch__thumb"] do
+
                 rawCheckbox (refValue ref) (refUpdateConst ref) [class_ "mdc-checkbox__native-control", attrs ("role":="switch")]
 
 --
