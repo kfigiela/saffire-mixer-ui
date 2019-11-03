@@ -3,6 +3,7 @@ module SaffireLE.UI.MainScreen where
 import SPrelude
 
 import Data.Int (round, toNumber)
+import Data.Number (isFinite)
 import Data.Number.Format (fixed, toStringWith)
 import MDC.Widgets (slider, switch, toggle, toggle')
 import Math (log, log10e)
@@ -189,6 +190,8 @@ mainWidget {meters, state, updateState, persistState} = do
   channelMixControls ref = do
     el "div" [class_ "channel-control"] do
       muteToggle $ mute' ref
+      el "div" [class_ "channel-control__value"] do
+        dynText $ refValue ref <#> volumeDb ∘ _.volume
       volumeSlider $ volume ref
       balanceSlider $ balance ref
 
@@ -222,9 +225,10 @@ mainWidget {meters, state, updateState, persistState} = do
   stateRef :: Ref MixerState
   stateRef = Ref state adjustState
   attenuationSlider ref = slider {min: 0, max: 0x7f, discrete: true, props: [attrD "title" (attenuationTitle <$> refValue ref)]} ref
-  attenuationTitle volume = "Output attenuation " <> (toStringWith (fixed 1) (((toNumber volume) - 127.0)*0.5)) <> " db"
-  volumeSlider ref = slider {min:  0.0, max: 1.0, discrete: false, props: [attrD "title" (volumeTitle <$> refValue ref)]} ref
-  volumeTitle volume = "Volume " <> toStringWith (fixed 2) (20.0 * (log volume/log 10.0)) <> " db"
+  attenuationTitle volume = "Output attenuation " <> (toStringWith (fixed 1) (((toNumber volume) - 127.0)*0.5)) <> " dB"
+  volumeSlider ref = slider {min:  0.0, max: 1.0, discrete: false, props: []} ref
+  volumeDb 0.0 = "-∞ dB"
+  volumeDb volume = toStringWith (fixed 2) (20.0 * (log volume/log 10.0)) <> " dB"
   balanceSlider ref = slider {min: -1.0, max: 1.0, discrete: false, props: [attrD "title" (balanceTitle <$> refValue ref)]} ref
   balanceTitle balance = "Balance " <> toStringWith (fixed 2) balance
   muteToggle ref = toggle {props: [attr "title" "Mute"], on: "volume_mute", off: "volume_up"} ref

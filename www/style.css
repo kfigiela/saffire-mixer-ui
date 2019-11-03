@@ -6,6 +6,7 @@ body {
 .vu__average {
     transition: 100ms 0ms ease;
 }
+   
 .vu__peak {
     transition: none;
     visibility: visible;
@@ -64,10 +65,17 @@ body {
 }
 .channel-control :first-child {
     flex: 0 0 auto;
+}
+
+.channel-control .channel-control__value {
+    flex: 0 0 50px;
+    text-align:right;
+    font-size: 12px;
+    white-space:nowrap;
     margin-right: 20px;
 }
 
-.channel-control :nth-child(2) {
+.channel-control :nth-child(3) {
     flex: 2 1 auto;
     margin-right: 20px;
 }
@@ -84,7 +92,7 @@ body {
 
 .mix-control__link {
     flex: 0 0 auto;
-    margin-right: 20px;
+    /* margin-right: 20px; */
 }
 
 .mix-control__controls {
@@ -143,11 +151,9 @@ body {
 
 .vu__scale > div {
     position: absolute;
-    /* text-align:center; */
     white-space: nowrap;
-    /* width: 30px; */
-    /* margin-left: -15px; */
-    /* text-align: center; */
-    border-left:  1px solid black;
-    padding-left: 3px;
+    padding-left: 2px;
+    border-left: 1px solid #e6e6e6;
+    padding-top: 2px;
+    font-size: 11px;
 }
