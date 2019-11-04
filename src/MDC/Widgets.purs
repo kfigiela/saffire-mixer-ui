@@ -2,13 +2,14 @@ module MDC.Widgets where
 
 import SPrelude
 
+import Data.Array as Array
 import Data.Number.Format (fixed, toStringWith)
 import Effect.Class.Console as Logger
 import Effect.Timer (setTimeout)
 import Specular.Callback (contramapCallbackDyn_)
 import Specular.Dom.Browser (Node)
 import Specular.Dom.Builder.Class (domEventWithSample)
-import Specular.Dom.Element (attr, attrWhen, classWhen, dynText, onClick_)
+import Specular.Dom.Element (attr, attrD, attrWhen, classWhen, dynText, onClick_)
 import Specular.Dom.Widget (emptyWidget)
 import Specular.Ref (Ref, refUpdate, refValue, refUpdateConst)
 
@@ -33,9 +34,15 @@ iconButton props clickCb = el "button" ([class_ "mdc-icon-button", attr "type" "
 
 -- Slider
 
-slider :: forall num. Show num => {min :: num, max :: num, discrete :: Boolean, props :: Array Prop} -> Ref num -> Widget Unit
-slider {min, max, discrete, props} ref = do
-    Tuple node _ <- el' "div" ([class_ "mdc-slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete", attrWhen discrete "data-step" "1"] <> props) do
+slider :: forall num. Show num => Semiring num => {min :: num, max :: num, discrete :: Boolean, props :: Array Prop, scale :: Array {point :: Number, label :: String}, currentValue :: num -> String} -> Ref num -> Widget Unit
+slider {min, max, discrete, props, scale, currentValue} ref = do
+ el "div" [class_ "slider"] do
+    unless (Array.null scale) do
+        el "div" [class_ "slider__scale", class_ "mdc-typography--caption"] do
+            flip traverse_ scale $ \{point, label} -> el "div" [attr "style" ("left: " <> show (100.0*point) <> "%;")] $ text label
+        el "div" [class_ "slider__current-value", class_ "mdc-typography--caption"] do
+            el "div" [attrD "style" (refValue ref <#> \value -> "left: " <> show value <> "")] $ dynText $ currentValue <$> refValue ref
+    Tuple node _ <- el' "div" ([class_ "mdc-slider", class_ "slider__slider", attrs ("tabindex":="0" <> "role":="slider" <> "aria-valuemin":=show min <> "aria-valuemax":=show max), classWhen discrete "mdc-slider--discrete", attrWhen discrete "data-step" "1"] <> props) do
         el "div" [class_ "mdc-slider__track-container"] do
             el "div" [class_ "mdc-slider__track"] emptyWidget
 

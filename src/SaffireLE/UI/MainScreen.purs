@@ -190,8 +190,6 @@ mainWidget {meters, state, updateState, persistState} = do
   channelMixControls ref = do
     el "div" [class_ "channel-control"] do
       muteToggle $ mute' ref
-      el "div" [class_ "channel-control__value"] do
-        dynText $ refValue ref <#> volumeDb ∘ _.volume
       volumeSlider $ volume ref
       balanceSlider $ balance ref
 
@@ -224,12 +222,46 @@ mainWidget {meters, state, updateState, persistState} = do
   adjustState = contramapCallbackDyn ((\state' adjustment -> adjustment state') <$> state) updateState
   stateRef :: Ref MixerState
   stateRef = Ref state adjustState
-  attenuationSlider ref = slider {min: 0, max: 0x7f, discrete: true, props: [attrD "title" (attenuationTitle <$> refValue ref)]} ref
-  attenuationTitle volume = "Output attenuation " <> (toStringWith (fixed 1) (((toNumber volume) - 127.0)*0.5)) <> " dB"
-  volumeSlider ref = slider {min:  0.0, max: 1.0, discrete: false, props: []} ref
-  volumeDb 0.0 = "-∞ dB"
-  volumeDb volume = toStringWith (fixed 2) (20.0 * (log volume/log 10.0)) <> " dB"
-  balanceSlider ref = slider {min: -1.0, max: 1.0, discrete: false, props: [attrD "title" (balanceTitle <$> refValue ref)]} ref
+  attenuationSlider ref =
+    slider
+     { min: 0
+     , max: 0x7f
+     , discrete: true
+     , props: [] -- [attrD "title" (attenuationTitle <$> refValue ref)]
+     , scale: [{point: 0.0, label: "-63.5 dB"}, {point: (127.0-96.0)/127.0, label: "-48"}, {point: (127.0-72.0)/127.0, label: "-36"}, {point: (127.0-48.0)/127.0, label: "-24"}, {point: (127.0-24.0)/127.0, label: "-12"}, {point: 1.0, label: "0"}]
+     , currentValue: attenuationTitle
+     } ref
+  attenuationTitle volume = toStringWith (fixed 1) (((toNumber volume) - 127.0)*0.5) <> " dB"
+  volumeSlider ref =
+    slider
+      { min: 0.0
+      , max: 1.0
+      , discrete: false
+      , props: []
+      , scale:
+         [ {point: 0.0,  label:  "-∞ dB"}
+         , {point: 0.251189, label: volumeDb 0 0.251189}
+         , {point: 0.501187,  label: volumeDb 0 0.501187}
+         , {point: 0.562341,  label: " "}
+         , {point: 0.630957,  label: " "}
+         , {point: 0.707946,  label: volumeDb 0 0.707946}
+         , {point: 0.794328,  label: " "}
+         , {point: 0.891251,  label: " "}
+         , {point: 1.0,  label: volumeDb 0 1.0}
+         ]
+      , currentValue: \v -> volumeDb 2 v <> " dB"
+      } ref
+  volumeDb _ 0.0 = "-∞"
+  volumeDb prec volume = toStringWith (fixed prec) (20.0 * (log volume/log 10.0))
+  balanceSlider ref =
+    slider
+      { min: -1.0
+      , max: 1.0
+      , discrete: false
+      , props: [attrD "title" (balanceTitle <$> refValue ref)]
+      , scale: [{point: 0.5, label: " "}]
+      , currentValue: const ""
+      } ref
   balanceTitle balance = "Balance " <> toStringWith (fixed 2) balance
   muteToggle ref = toggle {props: [attr "title" "Mute"], on: "volume_mute", off: "volume_up"} ref
   divider = el "hr" [class_ "divider"] emptyWidget
