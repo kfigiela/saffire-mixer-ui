@@ -4,6 +4,7 @@ import SPrelude
 
 import Data.Array ((:))
 import Data.Array as Array
+import Data.Int (toNumber)
 import Effect.Uncurried (mkEffectFn2)
 import Math (pow, round)
 import Specular.Dom.Browser (Node)
@@ -15,7 +16,7 @@ import Specular.Internal.Effect (pushDelayed)
 vuMeter :: String -> Dynamic (Maybe Number) -> Widget Unit
 vuMeter chName value = do
     lastMesurements <- foldDyn addNewMeasurement [] $ (fromMaybe (negate meterRange)) <$> changed value
-    currentScale <- uniqDyn $ roundCents ∘ dbToFraction <$> value
+    currentScale <- uniqDyn $ roundCents ∘ dbToFraction ∘ Just ∘ avg <$> lastMesurements
     peakScale <- uniqDyn $ roundCents ∘ dbToFraction ∘ maximum <$> lastMesurements
     clipping <- uniqDyn $ (_ == 1.0) <$> peakScale
 
@@ -45,6 +46,8 @@ vuMeter chName value = do
         meterRange = 96.0
         addNewMeasurement v [] = [v]
         addNewMeasurement v acc = v : (Array.take 9 acc)
+        avg :: Array Number -> Number
+        avg values = sum values / (toNumber (Array.length values))
 
 
 transform :: Dynamic Number -> Prop
