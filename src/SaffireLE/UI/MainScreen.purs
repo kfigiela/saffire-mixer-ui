@@ -28,37 +28,6 @@ mainWidget {meters, state, updateState, persistState} = do
 
   el "div" [class_ "container"] do
     channelGroup do
-      el "div" [class_ "mdc-layout-grid__cell"] do
-        vuMeter "Out 1" $ _.out1 ∘ _.meters <$> meters
-        vuMeter "Out 2" $ _.out2 ∘ _.meters <$> meters
-        el "div" [class_ "outopts"] do
-          el "label" [class_ "outopts__label"] do
-            muteToggle $ mute $ out12Opts $ stateRef
-          el "div" [class_ "outopts__control"] do
-            attenuationSlider $ attenuation' $ out12Opts $ stateRef
-
-      el "div" [class_ "mdc-layout-grid__cell"] do
-        vuMeter "Out 3" $ _.out3 ∘ _.meters <$> meters
-        vuMeter "Out 4" $ _.out4 ∘ _.meters <$> meters
-        el "div" [class_ "outopts"] do
-          el "label" [class_ "outopts__label"] do
-            muteToggle $ mute $ out34Opts $ stateRef
-          el "div" [class_ "outopts__control"] do
-            attenuationSlider $ attenuation' $ out34Opts $ stateRef
-
-      el "div" [class_ "mdc-layout-grid__cell"] do
-        vuMeter "Out 5" $ _.out5 ∘ _.meters <$> meters
-        vuMeter "Out 6" $ _.out6 ∘ _.meters <$> meters
-        el "div" [class_ "outopts"] do
-          el "label" [class_ "outopts__label"] do
-            muteToggle $ mute $ out56Opts $ stateRef
-          el "div" [class_ "outopts__control"] do
-            attenuationSlider $ attenuation' $ out56Opts $ stateRef
-
-
-    divider
-
-    channelGroup do
       whenSD $ mixGroupLowResControls stereoIn12 $ lowResMixer stateRef
       whenHD $ mixGroupHiResRecMixControls in1 in2 $ recMix $ highResMixer stateRef
       mixGroupMeters
@@ -111,35 +80,73 @@ mainWidget {meters, state, updateState, persistState} = do
         }
     divider
 
+    channelGroup do
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        vuMeter "Out 1" $ _.out1 ∘ _.meters <$> meters
+        vuMeter "Out 2" $ _.out2 ∘ _.meters <$> meters
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        vuMeter "Out 3" $ _.out3 ∘ _.meters <$> meters
+        vuMeter "Out 4" $ _.out4 ∘ _.meters <$> meters
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        vuMeter "Out 5" $ _.out5 ∘ _.meters <$> meters
+        vuMeter "Out 6" $ _.out6 ∘ _.meters <$> meters
+
+    divider
+
+    channelGroup do
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        el "div" [class_ "outopts"] do
+          el "label" [class_ "outopts__label"] do
+            muteToggle $ mute $ out12Opts $ stateRef
+          el "div" [class_ "outopts__control"] do
+            attenuationSlider $ attenuation' $ out12Opts $ stateRef
+
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        el "div" [class_ "outopts"] do
+          el "label" [class_ "outopts__label"] do
+            muteToggle $ mute $ out34Opts $ stateRef
+          el "div" [class_ "outopts__control"] do
+            attenuationSlider $ attenuation' $ out34Opts $ stateRef
+
+      el "div" [class_ "mdc-layout-grid__cell"] do
+        el "div" [class_ "outopts"] do
+          el "label" [class_ "outopts__label"] do
+            muteToggle $ mute $ out56Opts $ stateRef
+          el "div" [class_ "outopts__control"] do
+            attenuationSlider $ attenuation' $ out56Opts $ stateRef
+
+    divider
+
     el "div" [class_ "option-switches"] do
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        el "span" [class_ "material-icons"] $ dynText $ displayAudioOnIcon ∘ _.audioOn <$> meters
+        dynText $ displayAudioOnLabel ∘ _.audioOn <$> meters
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        switch displayHighResRef
+        text "HD audio"
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        switch $ spdifTransparent stateRef
+        text "SPDIF transparent"
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        switch $ midiThru stateRef
+        text "MIDI Thru"
+      whenSD do
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          el "span" [class_ "material-icons"] $ dynText $ displayAudioOnIcon ∘ _.audioOn <$> meters
-          dynText $ displayAudioOnLabel ∘ _.audioOn <$> meters
+          switch $ out12ToSpdif $ lowResMixer stateRef
+          text "Out 1 & 2 to SPDIF"
+      whenHD do
         el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch displayHighResRef
-          text "HD audio"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch $ spdifTransparent stateRef
-          text "SPDIF transparent"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch $ midiThru stateRef
-          text "MIDI Thru"
-        whenSD do
-          el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-            switch $ out12ToSpdif $ lowResMixer stateRef
-            text "Out 1 & 2 to SPDIF"
-        whenHD do
-          el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-            switch $ out12ToSpdif $ highResMixer stateRef
-            text "Out 1 & 2 to SPDIF"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch $ in3Gain stateRef
-          text "Input 3 high gain"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          switch $ in4Gain stateRef
-          text "Input 4 high gain"
-        el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-          el "button" [attr "type" "button", class_ "mdc-button", onClick_ persistState, attrWhenD ((_ == NotConnected) ∘ _.audioOn <$> meters) "disabled" "disabled"] $ text "Store settings"
+          switch $ out12ToSpdif $ highResMixer stateRef
+          text "Out 1 & 2 to SPDIF"
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        switch $ in3Gain stateRef
+        text "Input 3 high gain"
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        switch $ in4Gain stateRef
+        text "Input 4 high gain"
+      el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
+        el "button" [attr "type" "button", class_ "mdc-button", onClick_ persistState, attrWhenD ((_ == NotConnected) ∘ _.audioOn <$> meters) "disabled" "disabled"] $ text "Store settings"
+
   where
   channelGroup :: Widget Unit -> Widget Unit
   channelGroup body =
