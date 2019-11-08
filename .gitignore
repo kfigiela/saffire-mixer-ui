@@ -12,3 +12,6 @@ output
 .psc-package
 .purs-fast-bundle-cache
 
+dist/
+build/bin/saffire-mixer
+
