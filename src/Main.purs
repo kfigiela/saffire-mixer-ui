@@ -12,7 +12,7 @@ main = runMainWidgetInBody do
   backendAttempt <- newRef 0
   let retryConnection = const (_ + 1) >$< refUpdate backendAttempt
   withDynamic_ (refValue backendAttempt) \attempt -> do
-    backend <- connectToBackend "ws://localhost:53625" retryConnection
+    backend <- connectToBackend "ws://localhost:53625/ws" retryConnection
     whenJustD backend $ flip withDynamic_ mainWidget
     whenNothingD backend do
       el "div" [class_ "spinner__container"] spinner

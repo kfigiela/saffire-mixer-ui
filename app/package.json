@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "saffire-mixer-ui",
+  "displayName": "Focusrite Saffire LE mixer UI",
+  "version": "1.0.0",
+  "description": "UI",
+  "author": "Kamil Figiela",
+  "dependencies": {
+    "electron-root-path": "^1.0.9"
+  },
+  "devDependencies": {
+    "electron": "^7.1.1"
+  },
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron ."
+  }
+}

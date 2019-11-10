@@ -1,6 +1,6 @@
 
 exports._initSlider = function(node) {
-  window.slider =  new mdc.slider.MDCSlider(node);
+  window.slider = new mdc.slider.MDCSlider(node);
   return slider;
 };
 

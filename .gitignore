@@ -14,4 +14,4 @@ output
 
 dist/
 build/bin/saffire-mixer
-
+app/saffire-mixer
