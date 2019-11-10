@@ -5,8 +5,6 @@ body {
 
 .vu__average {
     transition: none;
-    /* transform 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1), -webkit-transform 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1) */
-    /* transition: transform 250ms 0ms linear; */
 }
 
 .vu__peak {
@@ -73,14 +71,6 @@ body {
 .channel-control :first-child {
     flex: 0 0 auto;
 }
-
-/* .channel-control .channel-control__value {
-    flex: 0 0 50px;
-    text-align:right;
-    font-size: 12px;
-    white-space:nowrap;
-    margin-right: 20px;
-} */
 
 .channel-control :nth-child(2) {
     flex: 2 1 auto;
@@ -176,7 +166,6 @@ body {
     width: 100%;
     top: 24px;
     height: 20px;
-    /*     top: 10px; */
 }
 
 .slider__scale > div {
@@ -198,7 +187,11 @@ body {
     white-space: nowrap;
     padding-top: 2px;
     font-size: 11px;
-    /* width: 30px;
-    text-align: center;
-    margin-left: -15px; */
+}
+
+.spinner__container {
+    position:absolute;
+    top: 50%;
+    width: 80%;
+    left: 10%;
 }

@@ -7,6 +7,7 @@ const { serverPath } = require('./app/binaries')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let server
 
 function createWindow () {
   // Create the browser window.
@@ -35,8 +36,7 @@ function createWindow () {
 }
 
 function startServer() {
-  console.log(serverPath)
-  childProcess.spawn(serverPath, ["server"], {stdio: 'inherit'});
+  server = childProcess.spawn(serverPath, ["server"], {stdio: 'inherit'});
 }
 
 // This method will be called when Electron has finished
@@ -59,6 +59,10 @@ app.on('activate', function () {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow()
 })
+
+app.on('will-quit', function() {
+  if(server !== null) server.kill('SIGINT');
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
