@@ -3,6 +3,7 @@ const {app, BrowserWindow} = require('electron')
 const path = require('path')
 const childProcess = require('child_process');
 const { serverPath } = require('./binaries')
+const { autoUpdater } = require("electron-updater")
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -45,6 +46,7 @@ function startServer() {
 app.on('ready', function() {
   startServer();
   createWindow();
+  autoUpdater.checkForUpdatesAndNotify();
 });
 
 // Quit when all windows are closed.

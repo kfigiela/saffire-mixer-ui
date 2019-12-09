@@ -43,7 +43,6 @@ body {
     padding-bottom: 0px;
     padding-top: 0;
     align-items: center;
-    /* display: flex; */
     width: 100%;
 }
 
@@ -117,10 +116,9 @@ body {
 }
 
 .container {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100vh;
     justify-content: space-evenly;
     align-items: center;
     align-content: stretch;
@@ -194,4 +192,20 @@ body {
     top: 50%;
     width: 80%;
     left: 10%;
+}
+
+.header {
+    position: relative;
+    flex:  0 0 auto;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+:root {
+    --mdc-theme-primary: #0f52ba;
+    --mdc-theme-secondary: #0f52ba;
 }

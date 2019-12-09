@@ -2,11 +2,10 @@ module SaffireLE.UI.MainScreen where
 
 import SPrelude
 
-import Data.Int (round, toNumber)
-import Data.Number (isFinite)
+import Data.Int (toNumber)
 import Data.Number.Format (fixed, toStringWith)
 import MDC.Widgets (slider, switch, toggle, toggle')
-import Math (log, log10e)
+import Math (log)
 import SaffireLE.Backend (Backend)
 import SaffireLE.Mixer (MixerState)
 import SaffireLE.Mixer.HiRes as H
@@ -19,12 +18,26 @@ import Specular.Dom.Widget (Widget, emptyWidget)
 import Specular.FRP (unlessD, whenD, whenJustD)
 import Specular.Ref (Ref(..), pureFocusRef)
 
+header :: Widget Unit
+header = do
+  el "header" [class_ "mdc-top-app-bar", class_ "mdc-top-app-bar--dense", class_ "header"] do
+    el "div" [class_ "mdc-top-app-bar__row"] do
+      el "section" [class_ "mdc-top-app-bar__section", class_ "mdc-top-app-bar__section--align-start"] do
+        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__navigation-icon--unbounded"] do text "menu"
+        el "span" [class_ "mdc-top-app-bar__title"] do text "Saffire LE Mixer"
+      el "section" [class_ "mdc-top-app-bar__section", class_ "mdc-top-app-bar__section--align-end"] do
+        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "file_download"
+        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "print"
+        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "info"
+
 mainWidget :: Backend -> Widget Unit
 mainWidget {meters, state, updateState, persistState} = do
   displayHighResRef <- newRef false
   let
     whenHD = whenD (refValue displayHighResRef)
     whenSD = unlessD (refValue displayHighResRef)
+
+  header
 
   el "div" [class_ "container"] do
     channelGroup do
