@@ -26,3 +26,7 @@ The GUI may be also accessed via network. Navigate to [http://localhost:53625/](
 ### Online resources
 
 * [FFADO Linux Driver code](https://github.com/adiknoth/ffado/tree/master/libffado/src/bebob/focusrite)
+
+## Acknowledgements
+
+Icon by [Sallee Design](http://www.iconarchive.com/show/music-icons-by-salleedesign/speaker-black-icon.html).
