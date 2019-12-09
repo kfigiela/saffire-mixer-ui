@@ -15,7 +15,7 @@
     "dist": "electron-builder",
     "publish": "electron-builder --publish always"
   },
-  "author": "Kamil Figiela",
+  "author": "Kamil Figiela <kamil.figiela@gmail.com>",
   "dependencies": {
     "autoprefixer": "^9.4.0",
     "browserify": "^16.2.3",
@@ -54,7 +54,8 @@
       "hardenedRuntime" : true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "identity": null
     },
     "directories": {
       "app": "app"

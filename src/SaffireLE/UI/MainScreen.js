@@ -1,5 +1,10 @@
-var electron = window.nodeRequire("electron")
 
 exports.openInfo = function () {
-  electron.shell.openExternal("https://github.com/kfigiela/saffire-mixer-ui/blob/master/README.md");
+  var url = "https://github.com/kfigiela/saffire-mixer-ui/blob/master/README.md";
+  if(window.nodeRequire) {
+    var electron = window.nodeRequire("electron")
+    electron.shell.openExternal(url);
+  } else {
+    window.open(url);
+  }
 };

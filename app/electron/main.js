@@ -2,8 +2,10 @@
 const {app, BrowserWindow, shell} = require('electron')
 const path = require('path')
 const childProcess = require('child_process');
-const { serverPath } = require('./binaries')
 const { autoUpdater } = require("electron-updater")
+const root = require('electron-root-path').rootPath;
+
+const serverPath = path.resolve(path.join(root, './saffire-mixer'));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -46,7 +48,7 @@ function createWindow () {
 }
 
 function startServer() {
-  server = childProcess.spawn(serverPath, ["server"], {stdio: 'inherit'});
+  server = childProcess.spawn(serverPath, ["server"], {stdio: 'inherit', cwd: root});
 }
 
 // This method will be called when Electron has finished
