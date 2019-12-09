@@ -5,5 +5,18 @@
         "output": true
     },
     "editor.autoIndent": false,
-    "editor.renderIndentGuides": false
+    "editor.renderIndentGuides": false,
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "dokuwiki"
+    ],
+    "spellright.parserByClass": {
+        "dokuwiki": {
+            "parser": "plain"
+        }
+    }
 }

@@ -6,7 +6,8 @@
   "description": "UI",
   "author": "Kamil Figiela",
   "dependencies": {
-    "electron-root-path": "^1.0.9"
+    "electron-root-path": "^1.0.9",
+    "electron-updater": "^4.2.0"
   },
   "devDependencies": {
     "electron": "^7.1.1"

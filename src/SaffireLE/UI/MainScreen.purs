@@ -13,22 +13,25 @@ import SaffireLE.Mixer.LowRes (ChannelMix, adjustMonoChannel1Mix, adjustMonoChan
 import SaffireLE.Mixer.LowRes as L
 import SaffireLE.Status (AudioStatus(..), VUMeters)
 import SaffireLE.UI.VUMeter (vuMeter)
+import Specular.Callback (mkCallback)
 import Specular.Dom.Element (attr, attrD, attrWhenD, onClick_)
 import Specular.Dom.Widget (Widget, emptyWidget)
 import Specular.FRP (unlessD, whenD, whenJustD)
 import Specular.Ref (Ref(..), pureFocusRef)
+
+foreign import openInfo :: Effect Unit
 
 header :: Widget Unit
 header = do
   el "header" [class_ "mdc-top-app-bar", class_ "mdc-top-app-bar--dense", class_ "header"] do
     el "div" [class_ "mdc-top-app-bar__row"] do
       el "section" [class_ "mdc-top-app-bar__section", class_ "mdc-top-app-bar__section--align-start"] do
-        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__navigation-icon--unbounded"] do text "menu"
+        -- el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__navigation-icon--unbounded"] do text "menu"
         el "span" [class_ "mdc-top-app-bar__title"] do text "Saffire LE Mixer"
       el "section" [class_ "mdc-top-app-bar__section", class_ "mdc-top-app-bar__section--align-end"] do
-        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "file_download"
-        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "print"
-        el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "info"
+        -- el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "file_download"
+        -- el "button" [class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "print"
+        el "button" [ attr "type" "button", onClick_ (mkCallback $ \_ -> openInfo), class_ "mdc-icon-button", class_ "material-icons", class_ "mdc-top-app-bar__action-item--unbounded"] do text "info"
 
 mainWidget :: Backend -> Widget Unit
 mainWidget {meters, state, updateState, persistState} = do
@@ -158,7 +161,13 @@ mainWidget {meters, state, updateState, persistState} = do
         switch $ in4Gain stateRef
         text "Input 4 high gain"
       el "label" [class_ "option-switches__option", class_ "mdc-typography--caption"] do
-        el "button" [attr "type" "button", class_ "mdc-button", onClick_ persistState, attrWhenD ((_ == NotConnected) ∘ _.audioOn <$> meters) "disabled" "disabled"] $ text "Store settings"
+        el "button"
+            [ attr "type" "button"
+            , class_ "mdc-button"
+            , onClick_ persistState
+            , attrWhenD ((_ == NotConnected) ∘ _.audioOn <$> meters) "disabled" "disabled"
+            , attr "title" "Store settings to persistent device memory (may casue short glitch – do not use LIVE)"
+            ] $ text "Store settings"
 
   where
   channelGroup :: Widget Unit -> Widget Unit

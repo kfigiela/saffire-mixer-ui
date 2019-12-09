@@ -7,13 +7,13 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps && bin/install-purescript && [ -n \"$DONT_RUN_BOWER_INSTALL\" ] || psc-package install",
     "clean": "rm -rf output",
-    "build": "bin/build",
     "prepl": "pulp --psc-package repl",
-    "pbuild": "pulp --psc-package build",
+    "build": "pulp --psc-package build && bin/purs-browserify Main output/bundle.js",
     "ptest": "pulp --psc-package test",
     "pscide": "psc-package sources | xargs purs ide server --log-level=debug 'src/**/*.purs' 'test/**/*.purs'",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "publish": "electron-builder --publish always"
   },
   "author": "Kamil Figiela",
   "dependencies": {

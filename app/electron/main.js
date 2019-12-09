@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, shell} = require('electron')
 const path = require('path')
 const childProcess = require('child_process');
 const { serverPath } = require('./binaries')
@@ -14,9 +14,10 @@ function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1400,
-    height: 800,
+    height: 860,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true
     },
     title: "Saffire LE Mixer"
   })
@@ -26,6 +27,14 @@ function createWindow () {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+  const handleRedirect = (e, url) => {
+    if (url !== e.sender.getURL()) {
+      e.preventDefault()
+      shell.openExternal(url)
+    }
+  }
+
+  mainWindow.webContents.on('will-navigate', handleRedirect)
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
