@@ -124,10 +124,6 @@ body {
     align-content: stretch;
 }
 
-.container > * {
-    width: 100%;
-}
-
 .divider {
     margin: 0;
 }
@@ -199,8 +195,14 @@ body {
     flex:  0 0 auto;
 }
 
+html {
+    height: 100%;
+    width: 100%;
+}
+
 body {
-    height: 100vh;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -208,4 +210,14 @@ body {
 :root {
     --mdc-theme-primary: #0f52ba;
     --mdc-theme-secondary: #0f52ba;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    color:red;
+}
+input{
+    -moz-appearance: textfield;
+    color:red !important;
 }
