@@ -2,7 +2,7 @@
   "private": true,
   "name": "saffire-mixer-ui",
   "displayName": "Focusrite Saffire LE mixer UI",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UI",
   "author": "Kamil Figiela",
   "dependencies": {
