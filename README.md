@@ -1,6 +1,6 @@
 ## Saffire LE Mixer
 
-A mixer GUI for [Focusrite Saffire LE](http://web.archive.org/web/20071011003332/http://www.focusrite.com/product/saffire_le/) audio interface that supports macOS Catalina which supports FireWire audio, but the original SaffireControl LE is no longer usable as it is 32-bit app.
+A mixer GUI for [Focusrite Saffire LE](http://web.archive.org/web/20071011003332/http://www.focusrite.com/product/saffire_le/) audio interface for macOS Catalina & Big Sur that still support FireWire audio, but the original SaffireControl LE is no longer usable as it is 32-bit app.
 
 ![Demo](.assets/demo.gif)
 
