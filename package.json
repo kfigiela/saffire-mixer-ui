@@ -2,7 +2,7 @@
   "private": true,
   "name": "saffire-mixer-ui",
   "displayName": "Focusrite Saffire LE mixer UI",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "UI",
   "scripts": {
     "postinstall": "electron-builder install-app-deps && bin/install-purescript && [ -n \"$DONT_RUN_BOWER_INSTALL\" ] || psc-package install",
@@ -29,14 +29,15 @@
   "main": "main.js",
   "devDependencies": {
     "async-sema": "3.0.0",
+    "electron": "11.0.3",
     "electron-builder": "^22.1.0",
     "eslint": "^6.3.0",
+    "grpc": "^1.24.2",
     "livereload": "^0.7.0",
     "mocha": "^6.2.0",
     "nodemon": "^1.18.0",
     "pulp": "^12.3.0",
-    "purescript-psa": "^0.7.3",
-    "grpc": "^1.24.2"
+    "purescript-psa": "^0.7.3"
   },
   "build": {
     "asar": false,
@@ -50,8 +51,10 @@
       "binaries": [
         "app/saffire-mixer"
       ],
-      "publish": ["github"],
-      "hardenedRuntime" : true,
+      "publish": [
+        "github"
+      ],
+      "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",

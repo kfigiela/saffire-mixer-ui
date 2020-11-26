@@ -2467,8 +2467,8 @@
       "unsafe-coerce",
       "unsafe-reference"
     ],
-    "repo": "../../../restaumatic/purescript-specular",
-    "version": "LATEST"
+    "repo": "https://github.com/restaumatic/purescript-specular.git",
+    "version": "v0.9.1"
   },
   "st": {
     "dependencies": [

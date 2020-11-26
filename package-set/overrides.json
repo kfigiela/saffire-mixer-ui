@@ -175,7 +175,7 @@
       "unsafe-reference"
     ],
     "repo": "https://github.com/restaumatic/purescript-specular.git",
-    "version": "11e6291b1b6c733d9a2b7331d978a6d78f21c938"
+    "version": "v0.9.1"
   },
   "uri": {
     "dependencies": [
