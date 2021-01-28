@@ -29,7 +29,7 @@
   "main": "main.js",
   "devDependencies": {
     "async-sema": "3.0.0",
-    "electron": "11.0.3",
+    "electron": "11.1.0",
     "electron-builder": "^22.1.0",
     "eslint": "^6.3.0",
     "grpc": "^1.24.2",
