@@ -32,7 +32,7 @@
     "electron": "11.0.3",
     "electron-builder": "^22.1.0",
     "eslint": "^6.3.0",
-    "grpc": "^1.24.2",
+    "grpc": "^1.24.9",
     "livereload": "^0.7.0",
     "mocha": "^6.2.0",
     "nodemon": "^1.18.0",
