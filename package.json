@@ -23,7 +23,7 @@
     "es6-shim": "^0.35.4",
     "firebase": "^5.5.1",
     "material-components-web": "^0.44.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "postcss-cli": "^6.0.1"
   },
   "main": "main.js",
