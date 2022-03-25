@@ -10,7 +10,7 @@
     "electron-updater": "^4.2.0"
   },
   "devDependencies": {
-    "electron": "11.0.3"
+    "electron": "13.6.6"
   },
   "main": "electron/main.js",
   "scripts": {
