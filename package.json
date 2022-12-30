@@ -34,7 +34,7 @@
     "eslint": "^6.3.0",
     "grpc": "^1.24.2",
     "livereload": "^0.7.0",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "nodemon": "^1.18.0",
     "pulp": "^12.3.0",
     "purescript-psa": "^0.7.3"
